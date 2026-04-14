@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import { Link } from 'wouter';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, LogOut } from 'lucide-react';
 import WalletConnect from '@/components/collection/WalletConnect';
 import CardGrid from '@/components/collection/CardGrid';
 import CardDetail from '@/components/collection/CardDetail';
 import { type CardData } from '@/lib/renaissApi';
 
 export default function MyCollection() {
-  const { connected, loading } = useWallet();
+  const { connected, loading, address, disconnectWallet } = useWallet();
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
+
+  // Shorten address for display: 0x1234...abcd
+  const shortAddr = address
+    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+    : '';
 
   return (
     <div className="min-h-screen bg-[oklch(0.07_0.005_260)]">
@@ -44,11 +49,32 @@ export default function MyCollection() {
             </span>
           </div>
 
-          {/* Renaiss status */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-400/[0.06] border border-emerald-400/[0.1]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] text-emerald-400/70 font-medium">Renaiss</span>
-          </div>
+          {/* Right side: wallet status or Renaiss badge */}
+          {connected && address ? (
+            <div className="flex items-center gap-2">
+              {/* Wallet address pill */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-400/[0.06] border border-emerald-400/[0.1]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] text-emerald-400/70 font-mono font-medium">
+                  {shortAddr}
+                </span>
+              </div>
+              {/* Disconnect button */}
+              <button
+                onClick={disconnectWallet}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-400/[0.06] border border-white/[0.06] hover:border-red-400/[0.15] transition-all duration-300"
+                title="断开钱包"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="text-[11px] font-medium hidden sm:inline">断开</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-400/[0.06] border border-emerald-400/[0.1]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] text-emerald-400/70 font-medium">Renaiss</span>
+            </div>
+          )}
         </div>
       </nav>
 
