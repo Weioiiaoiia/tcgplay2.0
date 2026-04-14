@@ -61,10 +61,10 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       },
       hero: {
         badge: "Renaiss Protocol · 已接入",
-        titleLine1: "让卡牌资产",
-        titleLine2: "以更清晰的方式呈现",
+        titleLine1: "让每一张卡，都拥有自己的“传记”。",
+        titleLine2: "别只是拥有它，去见证它。",
         subtitle:
-          "TCGPlay 聚合 Renaiss 链上卡牌数据，帮助收藏者查看资产、浏览市场、回溯流转记录，并在统一界面中完成多语言阅读与切换。",
+          "TCGPlay 以前瞻视角拆解 Renaiss 链上基因，不仅记录它的旅程，更要唤醒它的生命力。",
         primaryCta: "查看图鉴",
         secondaryCta: "浏览功能",
       },
@@ -164,14 +164,38 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       footer: {
         disclaimerTitle: "法律声明",
         disclaimerBody:
-          "TCGPlay 为独立第三方卡牌信息展示平台，与任何卡牌游戏发行方、IP 权利方或官方市场平台不存在隶属关系。页面中的卡牌名称、图片与相关资料仅用于信息展示，图片通过公开协议链接实时引用，平台本身不托管、不存储、不生成受版权保护的卡牌图像。",
+          "TCGPlay 为独立第三方卡牌信息展示与浏览平台，不隶属于 Pokémon、One Piece、Nintendo、The Pokémon Company、Shueisha Inc.、Eiichiro Oda 或任何其他卡牌 IP 的官方发行方、版权方、品牌方或关联机构。页面中出现的名称、标识、图像与资料仅用于公开信息识别、链上记录阅读与收藏参考，平台不主张相关知识产权归属，也不提供任何形式的官方授权、再发行或替代性官方服务。",
         disclaimerNote:
-          "如涉及知识产权或内容引用问题，请通过正式渠道联系处理。",
+          "如涉及知识产权、署名、链接引用或内容展示问题，请通过正式渠道联系我们处理。",
         copyright: "© 2026 TCGPlay. All rights reserved.",
         privacy: "隐私政策",
         terms: "使用条款",
         ip: "知识产权说明",
         contact: "联系我们",
+        privacyDialog: {
+          title: "隐私政策",
+          p1: "TCGPlay 重视用户隐私。平台当前主要提供卡牌信息浏览、链上记录查看、语言切换与页面访问服务，除实现基础功能、安全防护与访问稳定性所必需的信息外，不主动索取与服务无关的个人敏感信息。",
+          p2: "当用户连接钱包、访问页面、切换语言或点击外部链接时，系统可能记录必要的技术信息，例如公开钱包地址、访问时间、设备类型、浏览器语言、页面交互日志与来源页面。这些信息仅用于功能实现、异常排查、性能优化与安全防护。",
+          p3: "平台可能使用本地存储、Cookie 或同类技术保存语言偏好、界面状态与基础访问配置，以提升连续访问体验。用户可通过浏览器设置自行清除相关数据，但这可能影响部分功能的正常使用。",
+          p4: "站内展示的部分数据来自公开链上记录、公开接口或第三方服务。对于这些外部来源数据，其准确性、持续性与可用性受对应服务方影响。用户点击外部链接后，将适用目标网站自身的隐私政策与使用规则。",
+          p5: "如你对个人信息处理、数据引用或隐私相关事项有疑问，可通过官方联系渠道 X（Twitter）@chen1904o 与我们联系。",
+        },
+        termsDialog: {
+          title: "使用条款",
+          p1: "TCGPlay 是独立的卡牌信息展示与浏览平台，主要用于链上卡牌资产查看、市场信息浏览、流转记录阅读及相关公开信息整理。用户访问和使用本平台，即表示理解并同意按照本条款使用相关内容与功能。",
+          p2: "用户应仅以合法、正当、非误导性的方式使用本平台，不得利用平台从事侵权、冒充官方、批量攻击、恶意抓取、传播误导信息或任何违反适用法律法规的行为。",
+          p3: "平台展示的卡牌名称、角色名称、图像、商标、系列名称、扫描图及相关资料，其知识产权归属于原始权利人。所有 Pokémon 的商标、标识和图像均由 The Pokémon Company 拥有；所有 One Piece 及相关标志均为 Eiichiro Oda 和 Shueisha Inc. 的商标。RENAISS 为独立的正品收藏卡交易市场；平台引用的扫描图像仅用于识别用途。",
+          p4: "TCGPlay 与 The Pokémon Company、Nintendo、Shueisha Inc.、Eiichiro Oda、RENAISS 或任何相关实体不存在隶属、合作、授权、背书或官方关联关系。用户不得将本平台理解为官方站点、授权市场、版权授权页面或投资建议来源。",
+          p5: "如权利人认为平台中的内容、署名、链接或展示方式存在问题，可通过官方联系渠道 X（Twitter）@chen1904o 提交说明，平台将在核实后及时处理，必要时下线或调整相关内容。",
+        },
+        ipDialog: {
+          title: "知识产权说明",
+          p1: "TCGPlay 为独立第三方信息展示平台，不隶属于 Pokémon、One Piece、Nintendo、The Pokémon Company、Shueisha Inc.、Eiichiro Oda、RENAISS 或任何其他相关权利主体及其关联机构。",
+          p2: "平台中涉及的卡牌名称、角色名称、系列名称、图像、扫描图、标识、商标及相关描述，其对应知识产权均归原始创作者、项目方、版权方、品牌方或其他依法享有权利的主体所有。",
+          p3: "所有 Pokémon 的商标、标识和图像均由 The Pokémon Company 所有。所有 One Piece 及相关标志均为 Eiichiro Oda 和 Shueisha Inc. 的商标。平台不主张上述内容的所有权，也不提供官方授权、再发行、版权转授或替代性官方服务。",
+          p4: "RENAISS 是独立的正品收藏卡交易市场；平台引用的扫描图像与公开链上记录仅用于作品识别、资产检索、记录展示与收藏交流参考，不构成对任何原始知识产权的转让、授权或重新分发。",
+          p5: "如权利人对页面中的名称、图像、描述、链接、署名或展示方式存在异议，可通过官方联系渠道 X（Twitter）@chen1904o 提交说明，我们将在核实后及时处理，必要时下线或调整相关内容。",
+        },
       },
       collection: {
         back: "返回",
@@ -306,10 +330,10 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       },
       hero: {
         badge: "Renaiss Protocol · 已接入",
-        titleLine1: "讓卡牌資產",
-        titleLine2: "以更清晰的方式呈現",
+        titleLine1: "讓每一張卡，都擁有自己的「傳記」。",
+        titleLine2: "別只是擁有它，去見證它。",
         subtitle:
-          "TCGPlay 彙整 Renaiss 鏈上卡牌資料，協助收藏者查看資產、瀏覽市場、回溯流轉紀錄，並在統一介面中完成多語言閱讀與切換。",
+          "TCGPlay 以前瞻視角拆解 Renaiss 鏈上基因，不僅記錄它的旅程，更要喚醒它的生命力。",
         primaryCta: "查看圖鑑",
         secondaryCta: "瀏覽功能",
       },
@@ -409,14 +433,38 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       footer: {
         disclaimerTitle: "法律聲明",
         disclaimerBody:
-          "TCGPlay 為獨立第三方卡牌資訊展示平台，與任何卡牌遊戲發行方、IP 權利方或官方市場平台不存在隸屬關係。頁面中的卡牌名稱、圖片與相關資料僅用於資訊展示，圖片透過公開協議連結即時引用，平台本身不託管、不儲存、不生成受版權保護的卡牌圖像。",
+          "TCGPlay 為獨立第三方卡牌資訊展示與瀏覽平台，不隸屬於 Pokémon、One Piece、Nintendo、The Pokémon Company、Shueisha Inc.、Eiichiro Oda 或任何其他卡牌 IP 的官方發行方、版權方、品牌方或關聯機構。頁面中出現的名稱、標識、圖像與資料僅用於公開資訊識別、鏈上紀錄閱讀與收藏參考，平台不主張相關智慧財產權歸屬，也不提供任何形式的官方授權、再發行或替代性官方服務。",
         disclaimerNote:
-          "如涉及智慧財產或內容引用問題，請透過正式管道聯絡處理。",
+          "如涉及智慧財產、署名、連結引用或內容展示問題，請透過正式管道與我們聯絡處理。",
         copyright: "© 2026 TCGPlay. All rights reserved.",
         privacy: "隱私政策",
         terms: "使用條款",
         ip: "智慧財產說明",
         contact: "聯絡我們",
+        privacyDialog: {
+          title: "隱私政策",
+          p1: "TCGPlay 重視使用者隱私。平台目前主要提供卡牌資訊瀏覽、鏈上紀錄查看、語言切換與頁面存取服務，除實現基礎功能、安全防護與存取穩定性所必需的資訊外，不會主動索取與服務無關的個人敏感資訊。",
+          p2: "當使用者連接錢包、存取頁面、切換語言或點擊外部連結時，系統可能記錄必要的技術資訊，例如公開錢包地址、存取時間、裝置類型、瀏覽器語言、頁面互動紀錄與來源頁面。這些資訊僅用於功能實現、異常排查、效能優化與安全防護。",
+          p3: "平台可能使用本地儲存、Cookie 或同類技術保存語言偏好、介面狀態與基礎存取設定，以提升連續使用體驗。使用者可透過瀏覽器設定自行清除相關資料，但這可能影響部分功能的正常使用。",
+          p4: "站內展示的部分資料來自公開鏈上紀錄、公開介面或第三方服務。對於這些外部來源資料，其準確性、持續性與可用性受對應服務方影響。使用者點擊外部連結後，將適用目標網站自身的隱私政策與使用規則。",
+          p5: "如你對個人資料處理、資料引用或隱私相關事項有疑問，可透過官方聯絡管道 X（Twitter）@chen1904o 與我們聯絡。",
+        },
+        termsDialog: {
+          title: "使用條款",
+          p1: "TCGPlay 是獨立的卡牌資訊展示與瀏覽平台，主要用於鏈上卡牌資產查看、市場資訊瀏覽、流轉紀錄閱讀及相關公開資訊整理。使用者存取和使用本平台，即表示理解並同意依照本條款使用相關內容與功能。",
+          p2: "使用者應僅以合法、正當、非誤導性的方式使用本平台，不得利用平台從事侵權、冒充官方、批量攻擊、惡意抓取、散播誤導資訊或任何違反適用法律法規的行為。",
+          p3: "平台展示的卡牌名稱、角色名稱、圖像、商標、系列名稱、掃描圖及相關資料，其智慧財產權歸屬於原始權利人。所有 Pokémon 的商標、標識和圖像均由 The Pokémon Company 擁有；所有 One Piece 及相關標誌均為 Eiichiro Oda 和 Shueisha Inc. 的商標。RENAISS 為獨立的正品收藏卡交易市場；平台引用的掃描圖像僅用於識別用途。",
+          p4: "TCGPlay 與 The Pokémon Company、Nintendo、Shueisha Inc.、Eiichiro Oda、RENAISS 或任何相關實體不存在隸屬、合作、授權、背書或官方關聯關係。使用者不得將本平台理解為官方站點、授權市場、版權授權頁面或投資建議來源。",
+          p5: "如權利人認為平台中的內容、署名、連結或展示方式存在問題，可透過官方聯絡管道 X（Twitter）@chen1904o 提交說明，平台將在核實後及時處理，必要時下線或調整相關內容。",
+        },
+        ipDialog: {
+          title: "智慧財產說明",
+          p1: "TCGPlay 為獨立第三方資訊展示平台，不隸屬於 Pokémon、One Piece、Nintendo、The Pokémon Company、Shueisha Inc.、Eiichiro Oda、RENAISS 或任何其他相關權利主體及其關聯機構。",
+          p2: "平台中涉及的卡牌名稱、角色名稱、系列名稱、圖像、掃描圖、標識、商標及相關描述，其對應智慧財產權均歸原始創作者、專案方、版權方、品牌方或其他依法享有權利的主體所有。",
+          p3: "所有 Pokémon 的商標、標識和圖像均由 The Pokémon Company 所有。所有 One Piece 及相關標誌均為 Eiichiro Oda 和 Shueisha Inc. 的商標。平台不主張上述內容的所有權，也不提供官方授權、再發行、版權轉授或替代性官方服務。",
+          p4: "RENAISS 是獨立的正品收藏卡交易市場；平台引用的掃描圖像與公開鏈上紀錄僅用於作品識別、資產檢索、紀錄展示與收藏交流參考，不構成對任何原始智慧財產權的轉讓、授權或重新分發。",
+          p5: "如權利人對頁面中的名稱、圖像、描述、連結、署名或展示方式存在異議，可透過官方聯絡管道 X（Twitter）@chen1904o 提交說明，我們將在核實後及時處理，必要時下線或調整相關內容。",
+        },
       },
       collection: {
         back: "返回",
@@ -551,12 +599,12 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       },
       hero: {
         badge: "Renaiss Protocol · Connected",
-        titleLine1: "A clearer way to view",
-        titleLine2: "card assets",
+        titleLine1: "Give every card",
+        titleLine2: "a biography of its own.",
         subtitle:
-          "TCGPlay brings together on-chain card data from Renaiss so collectors can review holdings, browse listings, trace provenance, and switch languages in one interface.",
-        primaryCta: "Browse Index",
-        secondaryCta: "View Features",
+          "TCGPlay reads the on-chain DNA of Renaiss cards through a forward-looking lens. It does more than record their journey — it brings their presence back into focus.",
+        primaryCta: "View index",
+        secondaryCta: "Explore features",
       },
       market: {
         eyebrow: "Market Index",
@@ -654,13 +702,38 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       footer: {
         disclaimerTitle: "Legal Notice",
         disclaimerBody:
-          "TCGPlay is an independent third-party card information interface and is not affiliated with any publisher, IP owner, or official marketplace. Card names, images, and related materials are shown for informational display only. Images are referenced through public protocol links in real time, and the platform does not host, store, or generate copyrighted card artwork.",
-        disclaimerNote: "For IP or attribution concerns, please contact through a formal channel for review.",
+          "TCGPlay is an independent third-party interface for card information display and browsing. It is not affiliated with Pokémon, One Piece, Nintendo, The Pokémon Company, Shueisha Inc., Eiichiro Oda, or any other official publisher, rights holder, brand owner, or related entity. Names, marks, images, and related materials shown on the site are presented only for public information reference, on-chain record reading, and collection identification, and the platform does not claim any ownership in those rights or provide any official, licensed, or substitute official service.",
+        disclaimerNote:
+          "If you have concerns regarding IP, attribution, link usage, or content presentation, please contact us through the official channel for review.",
         copyright: "© 2026 TCGPlay. All rights reserved.",
         privacy: "Privacy",
         terms: "Terms",
         ip: "IP Notice",
         contact: "Contact",
+        privacyDialog: {
+          title: "Privacy Policy",
+          p1: "TCGPlay values user privacy. The platform currently provides card information browsing, on-chain record viewing, language switching, and page access services. Other than information necessary for core functionality, service stability, and security protection, we do not proactively request personal sensitive data unrelated to the service.",
+          p2: "When a user connects a wallet, visits pages, switches language, or clicks an external link, the system may record necessary technical information such as a public wallet address, access time, device type, browser language, page interaction logs, and referring pages. This information is used only for functionality, debugging, performance optimization, and security protection.",
+          p3: "The platform may use local storage, cookies, or similar technologies to save language preference, interface state, and basic access configuration in order to improve continuity of use. Users may clear such data through browser settings, but doing so may affect normal operation of some features.",
+          p4: "Some data displayed on the site comes from public on-chain records, public interfaces, or third-party services. The accuracy, continuity, and availability of such data depend on the corresponding external providers. When a user clicks an external link, the privacy policy and rules of the destination site will apply.",
+          p5: "If you have questions about personal data handling, data references, or privacy-related matters, please contact the official channel on X (Twitter) at @chen1904o.",
+        },
+        termsDialog: {
+          title: "Terms of Use",
+          p1: "TCGPlay is an independent platform for card information display and browsing, primarily used for viewing on-chain card assets, browsing market information, reading transfer records, and organizing related public information. By accessing or using the platform, you acknowledge and agree to use its content and features under these terms.",
+          p2: "Users must use the platform only in a lawful, proper, and non-misleading manner, and must not use the platform for infringement, impersonation of any official party, abusive scraping, automated attacks, dissemination of misleading information, or any conduct that violates applicable laws or regulations.",
+          p3: "Card names, character names, images, trademarks, series names, scan images, and related materials displayed on the platform remain the intellectual property of their original rights holders. All Pokémon trademarks, logos, and images are owned by The Pokémon Company. All One Piece marks and related logos are trademarks of Eiichiro Oda and Shueisha Inc. RENAISS is an independent marketplace for authentic collectible cards, and any scan images referenced by the platform are used solely for identification purposes.",
+          p4: "TCGPlay is not affiliated with, endorsed by, authorized by, or officially connected to The Pokémon Company, Nintendo, Shueisha Inc., Eiichiro Oda, RENAISS, or any related entity. Users must not interpret the platform as an official site, licensed marketplace, copyright authorization page, or source of investment advice.",
+          p5: "If a rights holder believes that any content, attribution, link, or presentation on the platform is improper, they may submit a notice through the official X (Twitter) account @chen1904o, and the platform will review and handle the matter promptly, including removal or adjustment where necessary.",
+        },
+        ipDialog: {
+          title: "Intellectual Property Notice",
+          p1: "TCGPlay is an independent third-party information display platform and is not affiliated with Pokémon, One Piece, Nintendo, The Pokémon Company, Shueisha Inc., Eiichiro Oda, RENAISS, or any other related rights holder or associated entity.",
+          p2: "Card names, character names, series names, images, scan images, logos, trademarks, and related descriptions appearing on the platform remain the intellectual property of their original creators, project operators, copyright owners, brand owners, or other lawful rights holders.",
+          p3: "All Pokémon trademarks, logos, and images are owned by The Pokémon Company. All One Piece marks and related logos are trademarks of Eiichiro Oda and Shueisha Inc. The platform does not claim ownership of any such material and does not provide official licensing, republication, sublicensing, or any substitute for official services.",
+          p4: "RENAISS is an independent marketplace for authentic collectible cards. Scan images and public on-chain records referenced by the platform are used only for work identification, asset lookup, record display, and collection reference, and do not constitute any transfer, license, or redistribution of underlying intellectual property rights.",
+          p5: "If a rights holder objects to any name, image, description, link, attribution, or method of presentation on the platform, they may contact the official X (Twitter) account @chen1904o. We will review the request promptly and, where necessary, remove or adjust the related content.",
+        },
       },
       collection: {
         back: "Back",
@@ -794,12 +867,12 @@ export const resources: Record<AppLanguage, LocaleResource> = {
         },
       },
       hero: {
-        badge: "Renaiss Protocol · Connected",
-        titleLine1: "カード資産を",
-        titleLine2: "より明快に把握する",
+        badge: "Renaiss Protocol ・ 接続済み",
+        titleLine1: "すべてのカードに、",
+        titleLine2: "固有の伝記を。",
         subtitle:
-          "TCGPlay は Renaiss のオンチェーンカードデータをまとめ、保有確認、市場閲覧、来歴追跡、多言語表示を一つの画面で行えるようにします。",
-        primaryCta: "一覧を見る",
+          "TCGPlay は先見的な視点で Renaiss のオンチェーンDNAを読み解きます。旅路を記録するだけでなく、そのカードが持つ存在感をあらためて立ち上がらせます。",
+        primaryCta: "図鑑を見る",
         secondaryCta: "機能を見る",
       },
       market: {
@@ -898,13 +971,38 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       footer: {
         disclaimerTitle: "法的表示",
         disclaimerBody:
-          "TCGPlay は独立した第三者のカード情報表示インターフェースであり、いかなる発行元、IP権利者、公式マーケットプレイスにも所属しません。カード名、画像、関連資料は情報表示のみを目的としており、画像は公開プロトコルリンクを通じてリアルタイム参照されます。プラットフォーム自体は著作権保護されたカード画像を保存・ホスト・生成しません。",
-        disclaimerNote: "知的財産またはクレジット表記に関する懸念は、正式な窓口からご連絡ください。",
+          "TCGPlay は独立した第三者のカード情報表示・閲覧プラットフォームであり、Pokémon、One Piece、Nintendo、The Pokémon Company、Shueisha Inc.、Eiichiro Oda、またはその他のカード IP の公式発行元、権利者、ブランド保有者、関連組織には所属していません。サイト上の名称、標識、画像、関連資料は、公開情報の参照、オンチェーン記録の閲覧、およびコレクション識別の目的でのみ表示されます。プラットフォームはこれらの権利の帰属を主張せず、公式サービス、許諾済みサービス、またはそれに代替するサービスを提供しません。",
+        disclaimerNote:
+          "知的財産、クレジット表記、リンク引用、または表示方法に関する懸念がある場合は、正式な窓口からご連絡ください。",
         copyright: "© 2026 TCGPlay. All rights reserved.",
         privacy: "プライバシー",
         terms: "利用規約",
         ip: "IP 表記",
         contact: "お問い合わせ",
+        privacyDialog: {
+          title: "プライバシーポリシー",
+          p1: "TCGPlay は利用者のプライバシーを重視します。現在のプラットフォームは、カード情報の閲覧、オンチェーン記録の確認、言語切替、ページアクセス機能を提供しており、基本機能・安全対策・安定運用に必要な情報を除き、サービスと無関係な機微な個人情報を積極的に求めることはありません。",
+          p2: "利用者がウォレットを接続する場合、ページを閲覧する場合、言語を切り替える場合、または外部リンクをクリックする場合、公開ウォレットアドレス、アクセス時刻、デバイス種別、ブラウザ言語、操作ログ、参照元ページなどの必要な技術情報が記録されることがあります。これらは機能提供、障害調査、性能最適化、および安全対策のためにのみ利用されます。",
+          p3: "プラットフォームは、言語設定、画面状態、基本的なアクセス設定を保存して継続的な利用体験を向上させるために、ローカルストレージ、Cookie、または類似技術を使用することがあります。利用者はブラウザ設定からこれらのデータを削除できますが、一部機能の正常な動作に影響する可能性があります。",
+          p4: "サイト上の一部データは、公開オンチェーン記録、公開 API、または第三者サービスに由来します。これら外部ソースデータの正確性、継続性、利用可能性は、各提供元の状況に依存します。利用者が外部リンクをクリックした場合、その先のサイトのプライバシーポリシーおよび利用ルールが適用されます。",
+          p5: "個人情報の取扱い、データ引用、またはプライバシーに関するお問い合わせは、公式連絡先である X（Twitter）@chen1904o までご連絡ください。",
+        },
+        termsDialog: {
+          title: "利用規約",
+          p1: "TCGPlay は独立したカード情報表示・閲覧プラットフォームであり、主にオンチェーンカード資産の確認、市場情報の閲覧、移転履歴の確認、および関連する公開情報の整理を目的として提供されています。利用者が本プラットフォームにアクセスまたは利用する場合、本規約に従ってコンテンツおよび機能を利用することに同意したものとみなされます。",
+          p2: "利用者は、適法かつ正当で、誤認を招かない方法でのみ本プラットフォームを利用しなければならず、権利侵害、公式を装う行為、過剰なスクレイピング、自動攻撃、誤解を招く情報の拡散、その他適用法令に違反する行為に利用してはなりません。",
+          p3: "プラットフォーム上に表示されるカード名、キャラクター名、画像、商標、シリーズ名、スキャン画像、関連資料の知的財産権は、元の権利者に帰属します。Pokémon の商標・ロゴ・画像は The Pokémon Company に帰属します。One Piece および関連ロゴは Eiichiro Oda と Shueisha Inc. の商標です。RENAISS は正規コレクタブルカードの独立マーケットプレイスであり、プラットフォームが参照するスキャン画像は識別目的に限って使用されます。",
+          p4: "TCGPlay は The Pokémon Company、Nintendo、Shueisha Inc.、Eiichiro Oda、RENAISS、または関連するいかなる主体とも、所属・提携・許諾・後援・公式関係を有しません。利用者は本プラットフォームを公式サイト、許諾済みマーケット、著作権許諾ページ、または投資判断の根拠として解釈してはなりません。",
+          p5: "権利者が本プラットフォーム上のコンテンツ、クレジット表記、リンク、または表示方法に問題があると考える場合は、公式 X（Twitter）アカウント @chen1904o までご連絡ください。必要に応じて、速やかに審査し、削除または調整を行います。",
+        },
+        ipDialog: {
+          title: "知的財産に関する表示",
+          p1: "TCGPlay は独立した第三者情報表示プラットフォームであり、Pokémon、One Piece、Nintendo、The Pokémon Company、Shueisha Inc.、Eiichiro Oda、RENAISS、またはその他の関連する権利者・関連主体には所属していません。",
+          p2: "プラットフォーム上に表示されるカード名、キャラクター名、シリーズ名、画像、スキャン画像、ロゴ、商標、関連説明の知的財産権は、元の制作者、プロジェクト運営者、著作権者、ブランド保有者、またはその他の適法な権利者に帰属します。",
+          p3: "Pokémon の商標・ロゴ・画像はすべて The Pokémon Company に帰属します。One Piece および関連ロゴは Eiichiro Oda と Shueisha Inc. の商標です。プラットフォームはこれらの素材について所有権を主張せず、公式ライセンス、再配布許諾、サブライセンス、または公式サービスの代替提供も行いません。",
+          p4: "RENAISS は正規コレクタブルカードの独立マーケットプレイスです。プラットフォームが参照するスキャン画像および公開オンチェーン記録は、作品識別、資産検索、記録表示、コレクション参照の目的でのみ使用され、元の知的財産権の譲渡、許諾、再配布を構成するものではありません。",
+          p5: "権利者がプラットフォーム上の名称、画像、説明、リンク、クレジット表記、または表示方法に異議を有する場合は、公式 X（Twitter）アカウント @chen1904o までご連絡ください。内容を確認のうえ、必要に応じて速やかに削除または調整を行います。",
+        },
       },
       collection: {
         back: "戻る",
@@ -1038,11 +1136,11 @@ export const resources: Record<AppLanguage, LocaleResource> = {
         },
       },
       hero: {
-        badge: "Renaiss Protocol · Connected",
-        titleLine1: "카드 자산을",
-        titleLine2: "더 명확하게 확인하는 방법",
+        badge: "Renaiss Protocol · 연동 완료",
+        titleLine1: "모든 카드에",
+        titleLine2: "자기만의 전기를 부여합니다.",
         subtitle:
-          "TCGPlay는 Renaiss 온체인 카드 데이터를 모아 보유 자산 확인, 시장 탐색, 이력 추적, 다국어 전환을 하나의 인터페이스에서 제공합니다.",
+          "TCGPlay는 미래지향적 시선으로 Renaiss 온체인 DNA를 해석합니다. 여정을 기록하는 데 그치지 않고, 카드가 지닌 존재감을 다시 드러냅니다.",
         primaryCta: "인덱스 보기",
         secondaryCta: "기능 보기",
       },
@@ -1142,13 +1240,38 @@ export const resources: Record<AppLanguage, LocaleResource> = {
       footer: {
         disclaimerTitle: "법적 고지",
         disclaimerBody:
-          "TCGPlay는 독립적인 제3자 카드 정보 인터페이스이며 어떤 퍼블리셔, IP 권리자, 공식 마켓플레이스와도 소속 관계가 없습니다. 카드명, 이미지, 관련 자료는 정보 제공 목적으로만 표시되며, 이미지는 공개 프로토콜 링크를 통해 실시간으로 참조됩니다. 플랫폼 자체는 저작권 보호 대상 카드 이미지를 저장, 호스팅, 생성하지 않습니다.",
-        disclaimerNote: "지식재산권 또는 출처 표기에 관한 우려가 있으면 공식 채널로 문의해 주세요.",
+          "TCGPlay는 독립적인 제3자 카드 정보 표시 및 열람 플랫폼이며, Pokémon, One Piece, Nintendo, The Pokémon Company, Shueisha Inc., Eiichiro Oda 또는 기타 카드 IP의 공식 발행사, 권리자, 브랜드 소유자, 관련 기관과 어떠한 소속 관계도 없습니다. 사이트에 표시되는 명칭, 표식, 이미지 및 관련 자료는 공개 정보 참조, 온체인 기록 열람, 컬렉션 식별 목적에 한해 제공되며, 플랫폼은 해당 권리의 귀속을 주장하지 않고 어떠한 공식 서비스, 허가 서비스 또는 이를 대체하는 서비스를 제공하지 않습니다.",
+        disclaimerNote:
+          "지식재산권, 출처 표기, 링크 인용 또는 콘텐츠 표시 방식에 관한 우려가 있으면 공식 채널로 문의해 주세요.",
         copyright: "© 2026 TCGPlay. All rights reserved.",
         privacy: "개인정보",
         terms: "이용약관",
         ip: "IP 안내",
         contact: "문의",
+        privacyDialog: {
+          title: "개인정보 처리방침",
+          p1: "TCGPlay는 이용자 프라이버시를 중요하게 생각합니다. 현재 플랫폼은 카드 정보 열람, 온체인 기록 확인, 언어 전환 및 페이지 접근 기능을 제공하며, 기본 기능 구현, 보안 보호, 안정적 운영에 필요한 정보를 제외하고는 서비스와 무관한 민감한 개인정보를 적극적으로 요구하지 않습니다.",
+          p2: "이용자가 지갑을 연결하거나, 페이지를 방문하거나, 언어를 전환하거나, 외부 링크를 클릭할 때 시스템은 공개 지갑 주소, 접속 시간, 기기 유형, 브라우저 언어, 페이지 상호작용 로그, 유입 페이지와 같은 필요한 기술 정보를 기록할 수 있습니다. 이러한 정보는 기능 제공, 오류 분석, 성능 최적화 및 보안 보호 목적으로만 사용됩니다.",
+          p3: "플랫폼은 언어 선호, 인터페이스 상태, 기본 접근 설정을 저장하여 연속적인 이용 경험을 높이기 위해 로컬 저장소, 쿠키 또는 유사 기술을 사용할 수 있습니다. 이용자는 브라우저 설정에서 이러한 데이터를 삭제할 수 있지만, 일부 기능의 정상 동작에 영향을 줄 수 있습니다.",
+          p4: "사이트에 표시되는 일부 데이터는 공개 온체인 기록, 공개 API 또는 제3자 서비스에서 제공됩니다. 이러한 외부 데이터의 정확성, 지속성 및 이용 가능성은 해당 제공자에 따라 달라집니다. 이용자가 외부 링크를 클릭하면 목적지 사이트의 개인정보 처리방침과 이용 규칙이 적용됩니다.",
+          p5: "개인정보 처리, 데이터 인용 또는 프라이버시 관련 문의가 있으면 공식 연락 채널인 X (Twitter) @chen1904o 로 문의해 주세요.",
+        },
+        termsDialog: {
+          title: "이용약관",
+          p1: "TCGPlay는 독립적인 카드 정보 표시 및 열람 플랫폼으로, 주로 온체인 카드 자산 확인, 시장 정보 열람, 이전 기록 확인 및 관련 공개 정보 정리를 위해 제공됩니다. 이용자가 플랫폼에 접속하거나 이용하는 경우, 본 약관에 따라 콘텐츠와 기능을 이용하는 데 동의한 것으로 간주됩니다.",
+          p2: "이용자는 플랫폼을 적법하고 정당하며 오해를 일으키지 않는 방식으로만 사용해야 하며, 침해 행위, 공식 사칭, 과도한 스크래핑, 자동 공격, 오해를 일으키는 정보의 유포 또는 기타 적용 법령을 위반하는 행위에 이용해서는 안 됩니다.",
+          p3: "플랫폼에 표시되는 카드명, 캐릭터명, 이미지, 상표, 시리즈명, 스캔 이미지 및 관련 자료의 지식재산권은 원래의 권리자에게 귀속됩니다. 모든 Pokémon 상표, 로고 및 이미지는 The Pokémon Company의 소유입니다. 모든 One Piece 표식 및 관련 로고는 Eiichiro Oda와 Shueisha Inc.의 상표입니다. RENAISS는 정품 수집 카드의 독립 마켓플레이스이며, 플랫폼이 참조하는 스캔 이미지는 식별 목적에 한해 사용됩니다.",
+          p4: "TCGPlay는 The Pokémon Company, Nintendo, Shueisha Inc., Eiichiro Oda, RENAISS 또는 기타 관련 주체와 어떠한 소속, 제휴, 허가, 보증 또는 공식 관계도 없습니다. 이용자는 플랫폼을 공식 사이트, 허가된 마켓플레이스, 저작권 허가 페이지 또는 투자 판단의 근거로 해석해서는 안 됩니다.",
+          p5: "권리자가 플랫폼의 콘텐츠, 출처 표기, 링크 또는 표시 방식에 문제가 있다고 판단하는 경우, 공식 X (Twitter) 계정 @chen1904o 로 통지할 수 있으며, 필요 시 신속히 검토 후 삭제 또는 조정을 진행합니다.",
+        },
+        ipDialog: {
+          title: "지식재산권 안내",
+          p1: "TCGPlay는 독립적인 제3자 정보 표시 플랫폼이며, Pokémon, One Piece, Nintendo, The Pokémon Company, Shueisha Inc., Eiichiro Oda, RENAISS 또는 기타 관련 권리자 및 연관 기관과 소속 관계가 없습니다.",
+          p2: "플랫폼에 표시되는 카드명, 캐릭터명, 시리즈명, 이미지, 스캔 이미지, 로고, 상표 및 관련 설명의 지식재산권은 원저작자, 프로젝트 운영자, 저작권자, 브랜드 소유자 또는 기타 적법한 권리자에게 귀속됩니다.",
+          p3: "모든 Pokémon 상표, 로고 및 이미지는 The Pokémon Company의 소유입니다. 모든 One Piece 표식 및 관련 로고는 Eiichiro Oda와 Shueisha Inc.의 상표입니다. 플랫폼은 해당 자료의 소유권을 주장하지 않으며, 공식 라이선스, 재배포 허가, 서브라이선스 또는 공식 서비스를 대체하는 어떤 제공도 하지 않습니다.",
+          p4: "RENAISS는 정품 수집 카드의 독립 마켓플레이스입니다. 플랫폼이 참조하는 스캔 이미지와 공개 온체인 기록은 작품 식별, 자산 조회, 기록 표시 및 컬렉션 참고 목적에 한해 사용되며, 원래 지식재산권의 양도, 허가 또는 재배포를 의미하지 않습니다.",
+          p5: "권리자가 플랫폼의 명칭, 이미지, 설명, 링크, 출처 표기 또는 표시 방식에 이의를 제기하는 경우, 공식 X (Twitter) 계정 @chen1904o 로 문의해 주세요. 내용을 검토한 뒤 필요 시 신속히 삭제 또는 조정하겠습니다.",
+        },
       },
       collection: {
         back: "뒤로",
