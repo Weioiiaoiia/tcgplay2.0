@@ -90,6 +90,7 @@ export default function Features() {
         en: t("features.cards.market.en"),
         desc: t("features.cards.market.desc"),
         size: "large",
+        route: "/market",
       },
       {
         title: t("features.cards.constellation.title"),

@@ -5,15 +5,18 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { WalletProvider } from "./contexts/WalletContext";
+import { CardDataProvider } from "./contexts/CardDataContext";
 import Home from "./pages/Home";
 import CardDetail from "./pages/CardDetail";
 import MyCollection from "./pages/MyCollection";
+import MarketIndex from "./pages/MarketIndex";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/card/:id" component={CardDetail} />
+      <Route path="/card/:tokenId" component={CardDetail} />
+      <Route path="/market" component={MarketIndex} />
       <Route path="/my-collection" component={MyCollection} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
@@ -26,10 +29,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <WalletProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <CardDataProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </CardDataProvider>
         </WalletProvider>
       </ThemeProvider>
     </ErrorBoundary>

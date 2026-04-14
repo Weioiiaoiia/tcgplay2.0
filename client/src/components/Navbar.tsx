@@ -19,7 +19,7 @@ export default function Navbar() {
 
   const navItems = useMemo(
     () => [
-      { label: t("navbar.marketIndex"), id: "market-pulse" },
+      { label: t("navbar.marketIndex"), id: "market-pulse", route: "/market" },
       { label: t("navbar.cardChronicle"), id: "card-story" },
       { label: t("navbar.features"), id: "features" },
     ],
@@ -48,6 +48,15 @@ export default function Navbar() {
     setMobileOpen(false);
   };
 
+  const handleNavClick = (item: { id: string; route?: string }) => {
+    if (item.route) {
+      setLocation(item.route);
+    } else {
+      scrollTo(item.id);
+    }
+    setMobileOpen(false);
+  };
+
   const soon = (name: string) =>
     toast(name, { description: t("navbar.comingSoon") });
 
@@ -64,7 +73,7 @@ export default function Navbar() {
 
       <div className="relative container flex items-center justify-between h-14">
         <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() => { setLocation("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
           className="flex items-center gap-2.5 group"
         >
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-white/15 to-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover:from-white/20 transition-all duration-300">
@@ -123,7 +132,7 @@ export default function Navbar() {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => scrollTo(item.id)}
+              onClick={() => handleNavClick(item)}
               className="px-3.5 py-2 rounded-lg text-[13px] text-white/50 hover:text-white/80 hover:bg-white/[0.04] transition-all duration-300"
             >
               {item.label}
@@ -133,7 +142,7 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-3">
           <button
-            onClick={() => scrollTo("market-pulse")}
+            onClick={() => setLocation("/market")}
             className="p-2 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all duration-300"
           >
             <Search className="w-4 h-4" />
@@ -180,11 +189,11 @@ export default function Navbar() {
               </div>
 
               <button onClick={() => { setLocation("/my-collection"); setMobileOpen(false); }} className="block w-full text-left py-3 text-[15px] text-white/60 hover:text-white">{t("navbar.myCollection")}</button>
-              <button onClick={() => scrollTo("market-pulse")} className="block w-full text-left py-3 text-[15px] text-white/60 hover:text-white">{t("navbar.library")}</button>
-              {navItems.map((item) => (
+              <button onClick={() => { setLocation("/market"); setMobileOpen(false); }} className="block w-full text-left py-3 text-[15px] text-white/60 hover:text-white">{t("navbar.marketIndex")}</button>
+              {navItems.filter(item => !item.route).map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => scrollTo(item.id)}
+                  onClick={() => handleNavClick(item)}
                   className="block w-full text-left py-3 text-[15px] text-white/60 hover:text-white"
                 >
                   {item.label}
