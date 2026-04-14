@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Menu, X, Search } from "lucide-react";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 const navItems = [
   { label: "市场图鉴", id: "market-pulse" },
@@ -25,6 +26,7 @@ export default function Navbar() {
   const [subOpen, setSubOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -69,6 +71,14 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
+          {/* 我的卡库 — direct link */}
+          <button
+            onClick={() => setLocation("/my-collection")}
+            className="px-3.5 py-2 rounded-lg text-[13px] text-white/50 hover:text-white/80 hover:bg-white/[0.04] transition-all duration-300"
+          >
+            我的卡库
+          </button>
+
           {/* 卡库 with dropdown */}
           <div
             className="relative"
@@ -137,7 +147,7 @@ export default function Navbar() {
 
           {/* Connect wallet */}
           <button
-            onClick={() => soon("连接钱包")}
+            onClick={() => setLocation("/my-collection")}
             className="px-4 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08] text-[13px] text-white/70 font-medium hover:bg-white/[0.1] hover:text-white transition-all duration-300"
           >
             连接钱包
@@ -163,6 +173,7 @@ export default function Navbar() {
             className="md:hidden relative overflow-hidden bg-[oklch(0.08_0.005_260/0.98)] backdrop-blur-2xl border-b border-white/[0.06]"
           >
             <div className="container py-6 space-y-1">
+              <button onClick={() => { setLocation("/my-collection"); setMobileOpen(false); }} className="block w-full text-left py-3 text-[15px] text-white/60 hover:text-white">我的卡库</button>
               <button onClick={() => scrollTo("market-pulse")} className="block w-full text-left py-3 text-[15px] text-white/60 hover:text-white">卡库</button>
               {navItems.map((item) => (
                 <button
@@ -178,7 +189,7 @@ export default function Navbar() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   <span className="text-[12px] text-emerald-400/60">Renaiss 已接入</span>
                 </div>
-                <button onClick={() => soon("连接钱包")} className="text-[14px] text-white/60 font-medium">连接钱包</button>
+                <button onClick={() => { setLocation("/my-collection"); setMobileOpen(false); }} className="text-[14px] text-white/60 font-medium">连接钱包</button>
               </div>
             </div>
           </motion.div>

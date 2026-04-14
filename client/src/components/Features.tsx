@@ -4,6 +4,7 @@
  */
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 const features = [
   {
@@ -11,6 +12,7 @@ const features = [
     en: "My Collection",
     desc: "绑定 Renaiss 钱包，秒级同步所有链上卡牌资产。统一管理、智能分类、一键检索，你的数字收藏从此井然有序。",
     size: "large",
+    route: "/my-collection",
   },
   {
     title: "展览厅",
@@ -76,6 +78,15 @@ const features = [
 
 function FeatureCard({ f, i }: { f: (typeof features)[0]; i: number }) {
   const isLarge = f.size === "large";
+  const [, setLocation] = useLocation();
+
+  const handleClick = () => {
+    if (f.route) {
+      setLocation(f.route);
+    } else {
+      toast(f.title, { description: "功能即将上线" });
+    }
+  };
 
   return (
     <motion.button
@@ -83,7 +94,7 @@ function FeatureCard({ f, i }: { f: (typeof features)[0]; i: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.45, delay: i * 0.04 }}
-      onClick={() => toast(f.title, { description: "功能即将上线" })}
+      onClick={handleClick}
       className={`group relative text-left overflow-hidden rounded-2xl border border-white/[0.05] hover:border-white/[0.1] transition-all duration-500 ${
         isLarge ? "sm:col-span-2 p-8 sm:p-10" : "p-6 sm:p-8"
       }`}
@@ -104,6 +115,11 @@ function FeatureCard({ f, i }: { f: (typeof features)[0]; i: number }) {
             {f.title}
           </h3>
           <span className="text-[11px] text-white/15 tracking-wide">{f.en}</span>
+          {f.route && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400/60 border border-emerald-400/15 font-medium">
+              LIVE
+            </span>
+          )}
         </div>
 
         {/* Thin separator */}
