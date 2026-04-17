@@ -174,28 +174,26 @@ export default function CardDetail({ card, onClose }: Props) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.985 }}
           transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-[860px] overflow-hidden rounded-[1.5rem] border border-[#e6dfd2] bg-[#fbf8f1] shadow-[0_30px_90px_-36px_rgba(30,24,14,0.24)]"
+          className="w-full max-w-[860px] rounded-[1.5rem] border border-[#e6dfd2] bg-[#fbf8f1] shadow-[0_30px_90px_-36px_rgba(30,24,14,0.24)] overflow-hidden"
         >
           {/* 左侧图片区与右侧信息区等高 */}
           <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1fr]">
-            {/* 左侧：卡牌展示区 — 占满全高 */}
-            <div className="flex flex-col border-b border-[#ece5d8] bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),rgba(245,239,227,0.94)_55%,rgba(241,234,220,0.98))] px-4 py-4 sm:px-5 sm:py-5 lg:absolute lg:inset-y-0 lg:left-0 lg:w-1/2 lg:border-b-0 lg:border-r">
-              <div className="flex flex-1 items-center justify-center rounded-[1.3rem] border border-[#ece5d8] bg-[linear-gradient(180deg,rgba(255,255,255,0.7),rgba(245,239,227,0.88))] px-3 py-5 sm:px-4">
-                <div className="relative flex w-full max-w-[320px] items-center justify-center rounded-[1.15rem] bg-[#161616] px-5 py-6 shadow-[0_20px_48px_rgba(22,22,22,0.18)]">
-                  <img
-                    ref={imgElRef}
-                    src={card.frontImageUrl}
-                    alt={card.pokemonName}
-                    className={`max-h-[46vh] max-w-full object-contain ${isTouch ? "" : "cursor-crosshair"}`}
-                    draggable={false}
-                    onMouseMove={handleMagnifierMove}
-                    onMouseLeave={handleMagnifierLeave}
-                    style={{ filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.35))" }}
-                  />
-                </div>
+            {/* 左侧：卡牌展示区 — 占满全高，大图直观 */}
+            <div className="relative flex flex-col border-b border-[#ece5d8] bg-[#1a1612] lg:absolute lg:inset-y-0 lg:left-0 lg:w-1/2 lg:border-b-0 lg:border-r overflow-hidden">
+              {/* 卡牌图片铺满整个左侧 */}
+              <div className="relative flex-1 flex items-center justify-center min-h-[320px] lg:min-h-0">
+                <img
+                  ref={imgElRef}
+                  src={card.frontImageUrl}
+                  alt={card.pokemonName}
+                  className={`w-full h-full object-cover ${isTouch ? "" : "cursor-crosshair"}`}
+                  draggable={false}
+                  onMouseMove={handleMagnifierMove}
+                  onMouseLeave={handleMagnifierLeave}
+                />
               </div>
               {!isTouch && (
-                <p className="mt-4 text-center text-[10px] tracking-[0.06em] text-black/24">
+                <p className="absolute bottom-3 left-0 right-0 text-center text-[10px] tracking-[0.06em] text-white/40">
                   悬停图片可查看局部放大
                 </p>
               )}

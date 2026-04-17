@@ -39,6 +39,23 @@ function preload(cards: CardData[]) {
   cards.forEach(c => { if (c.frontImageUrl) { const i = new Image(); i.src = c.frontImageUrl; } });
 }
 
+// Parse raw askPrice from wei or plain USDT string to a human-readable USDT string
+function parseAskPrice(raw: any): string {
+  if (!raw || raw === 'NO-ASK-PRICE') return 'NO-ASK-PRICE';
+  const str = String(raw);
+  // If length > 15, it's likely a wei (1e18) value
+  if (str.length > 15) {
+    try {
+      const converted = Number(BigInt(str) / BigInt(1e14)) / 10000;
+      return converted > 0 ? String(Math.round(converted * 100) / 100) : 'NO-ASK-PRICE';
+    } catch {
+      return 'NO-ASK-PRICE';
+    }
+  }
+  const num = parseFloat(str);
+  return Number.isFinite(num) && num > 0 ? String(Math.round(num * 100) / 100) : 'NO-ASK-PRICE';
+}
+
 // Parse a raw Renaiss API item into CardData
 function parseCard(item: any): CardData {
   const getAttr = (trait: string) => {
@@ -62,7 +79,7 @@ function parseCard(item: any): CardData {
     language: item.language || getAttr('Language'),
     gradingCompany: item.gradingCompany || getAttr('Grader') || 'PSA',
     vaultLocation: item.vaultLocation || 'platform',
-    askPriceInUSDT: item.askPriceInUSDT || 'NO-ASK-PRICE',
+    askPriceInUSDT: parseAskPrice(item.askPriceInUSDT),
     type: item.type || 'POKEMON',
   };
 }

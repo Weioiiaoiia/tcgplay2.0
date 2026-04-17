@@ -4,9 +4,9 @@
  * and real market preview. Roadmap and Compliance stay off the user-facing
  * homepage while legal semantics still remain in the footer.
  */
-import { useMemo, type ReactNode } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Compass, FolderSearch, RefreshCw } from "lucide-react";
+import { useMemo, useState, useRef, useEffect, type ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Compass, FolderSearch, RefreshCw, ChevronDown, BarChart2, BookImage, User } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import Footer from "@/components/Footer";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -27,38 +27,168 @@ function formatTime(date: Date) {
   });
 }
 
+// 市场监控平台数据
+const MARKET_PLATFORMS = [
+  {
+    id: "renaiss",
+    label: "Renaiss",
+    logo: "/renaiss-logo.png",
+    live: true,
+  },
+  {
+    id: "collector",
+    label: "Collector Market",
+    logo: "/collector-logo.png",
+    live: false,
+  },
+];
+
+// 下拉功能菜单
+const NAV_ITEMS = [
+  { label: "市场监控", href: "/market", icon: "📊", desc: "实时在售卡牌监控", live: true },
+  { label: "我的藏品", href: "/collection", icon: "🗂", desc: "链上藏品查询与管理", live: true },
+  { label: "TCG 洞察引擎", href: "#", icon: "🔍", desc: "深度数据分析与趋势", live: false },
+  { label: "卡牌图集", href: "#", icon: "📖", desc: "全系列卡牌图鉴数据库", live: false },
+];
+
+function NavMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative hidden md:block">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+          open
+            ? "border-neutral-950 bg-neutral-950 text-white"
+            : "border-black/8 bg-white/70 text-black/64 hover:bg-neutral-950 hover:text-white hover:border-neutral-950"
+        }`}
+      >
+        功能
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.97 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2 overflow-hidden rounded-[1.4rem] border border-black/8 bg-[#fbf8f2] shadow-[0_24px_60px_-16px_rgba(24,24,27,0.22)] backdrop-blur-xl"
+          >
+            <div className="p-2">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`group flex items-center gap-3 rounded-[0.9rem] px-3 py-2.5 transition ${
+                    item.live ? "hover:bg-black/5" : "opacity-50 cursor-not-allowed pointer-events-none"
+                  }`}
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.6rem] border border-black/8 bg-white text-base shadow-sm">
+                    {item.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-neutral-950">{item.label}</span>
+                      {!item.live && (
+                        <span className="rounded-full bg-[#f0ebe0] px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[#a89880]">Soon</span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-black/40">{item.desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function EntryCard({
   icon,
   title,
   desc,
   href,
   strong,
+  showPlatforms,
 }: {
   icon: ReactNode;
   title: string;
   desc: string;
   href: string;
   strong?: boolean;
+  showPlatforms?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={`group rounded-[1.55rem] border border-black/8 px-5 py-5 shadow-[0_18px_55px_-38px_rgba(24,24,27,0.28)] transition duration-300 hover:-translate-y-1 ${
-        strong ? "bg-neutral-950 text-white" : "bg-white/82 text-neutral-950"
+      className={`group rounded-[1.55rem] border px-5 py-5 shadow-[0_18px_55px_-38px_rgba(24,24,27,0.28)] transition duration-300 hover:-translate-y-1 ${
+        strong ? "border-[#e0d8cc] bg-[#faf7f1] text-[#1a1612]" : "border-black/8 bg-white/82 text-neutral-950"
       }`}
     >
       <div
         className={`flex h-11 w-11 items-center justify-center rounded-[1rem] border ${
-          strong ? "border-white/10 bg-white/8 text-white" : "border-black/8 bg-[#f6f2eb] text-neutral-950"
+          strong ? "border-[#e0d8cc] bg-[#f0ebe0] text-[#1a1612]" : "border-black/8 bg-[#f6f2eb] text-neutral-950"
         }`}
       >
         {icon}
       </div>
       <div className="mt-5 flex items-center justify-between gap-3">
-        <h2 className={`text-xl font-semibold ${strong ? "text-white" : "text-neutral-950"}`}>{title}</h2>
-        <ArrowRight className={`h-4 w-4 transition group-hover:translate-x-0.5 ${strong ? "text-white/70" : "text-black/42"}`} />
+        <h2 className={`text-xl font-semibold ${strong ? "text-[#1a1612]" : "text-neutral-950"}`}>{title}</h2>
+        <ArrowRight className={`h-4 w-4 transition group-hover:translate-x-0.5 ${strong ? "text-[#6b6055]" : "text-black/42"}`} />
       </div>
-      <p className={`mt-2 text-sm leading-7 ${strong ? "text-white/68" : "text-black/48"}`}>{desc}</p>
+      <p className={`mt-2 text-sm leading-7 ${strong ? "text-[#8a7f70]" : "text-black/48"}`}>{desc}</p>
+
+      {/* 平台标识 — 仅市场监控卡片显示 */}
+      {showPlatforms && (
+        <div className="mt-4 flex items-center gap-2">
+          {MARKET_PLATFORMS.map((p) => (
+            <div
+              key={p.id}
+              className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 ${
+                p.live
+                  ? "border-[#b8e4c8] bg-[#edf9f2]"
+                  : "border-[#e0d8cc] bg-[#f5f0e8] opacity-70"
+              }`}
+            >
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#e0d8cc] bg-white shadow-sm">
+                <img
+                  src={p.logo}
+                  alt={p.label}
+                  className="h-4 w-4 object-contain"
+                />
+              </div>
+              <span className={`text-[11px] font-medium ${
+                p.live ? "text-[#2d7a4f]" : "text-[#8a7f70]"
+              }`}>
+                {p.label}
+              </span>
+              {p.live ? (
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#4a9e6a] animate-pulse" />
+                  <span className="font-mono text-[9px] text-[#4a9e6a]">Live</span>
+                </span>
+              ) : (
+                <span className="font-mono text-[9px] text-[#a89880]">即将上线</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </Link>
   );
 }
@@ -137,13 +267,12 @@ export default function Home() {
             <span className="text-lg font-semibold text-neutral-950">TCGPlay</span>
           </button>
 
-          <nav className="hidden items-center gap-7 text-sm text-black/56 md:flex">
-            <Link href="/market" className="transition hover:text-black">
-              市场监控
-            </Link>
-            <Link href="/collection" className="transition hover:text-black">
-              Collection
-            </Link>
+          <nav className="hidden items-center gap-1 text-sm md:flex">
+            <Link href="/market" className="rounded-full px-3.5 py-2 font-medium text-black/60 transition hover:bg-black/6 hover:text-black">市场监控</Link>
+            <Link href="/collection" className="rounded-full px-3.5 py-2 font-medium text-black/60 transition hover:bg-black/6 hover:text-black">我的藏品</Link>
+            <span className="rounded-full px-3.5 py-2 font-medium text-black/28 cursor-not-allowed">TCG 洞察引擎 <span className="ml-1 rounded-full bg-[#f0ebe0] px-1.5 py-0.5 font-mono text-[8px] text-[#a89880]">Soon</span></span>
+            <span className="rounded-full px-3.5 py-2 font-medium text-black/28 cursor-not-allowed">卡牌图集 <span className="ml-1 rounded-full bg-[#f0ebe0] px-1.5 py-0.5 font-mono text-[8px] text-[#a89880]">Soon</span></span>
+            <Link href="/features" className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white/80 px-3.5 py-2 font-medium text-black/70 shadow-sm transition hover:bg-neutral-950 hover:text-white hover:border-neutral-950">功能</Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -166,6 +295,14 @@ export default function Home() {
               进入市场
               <ArrowRight className="h-4 w-4" />
             </button>
+            <button
+              onClick={() => {}}
+              className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/70 px-4 py-2.5 text-sm font-medium text-black/64 transition hover:bg-neutral-950 hover:text-white hover:border-neutral-950"
+              title="即将上线"
+            >
+              <User className="h-4 w-4" />
+              Sign In
+            </button>
           </div>
         </div>
       </header>
@@ -178,28 +315,40 @@ export default function Home() {
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             className="rounded-[2rem] border border-black/8 bg-white/82 p-6 shadow-[0_26px_90px_-44px_rgba(24,24,27,0.32)] backdrop-blur-xl sm:p-8"
           >
-            <div className="text-[0.68rem] uppercase tracking-[0.3em] text-black/34">Product Entry</div>
-            <h1 className="mt-4 font-serif text-4xl leading-[0.95] text-neutral-950 sm:text-5xl lg:text-6xl">
-              TCGPlay 2.0
+            <div className="text-[0.68rem] uppercase tracking-[0.3em] text-black/34">TCGPlay</div>
+            <h1 className="mt-4 font-serif text-4xl leading-[1.05] text-neutral-950 sm:text-5xl lg:text-[3.6rem]">
+              以前瞻视角
+              <br />
+              <span className="text-black/50">拆解 TCG 链上基因</span>
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-black/48 sm:text-[0.96rem]">
-              直接进入市场监控和 Collection，首页只保留必要状态与实时市场数据。
+            <p className="mt-5 max-w-xl text-[0.96rem] leading-[1.85] text-black/52">
+              不仅记录它的旅程，更要唤醒它的生命力。
+            </p>
+            <p className="mt-2 font-serif text-[1.05rem] italic leading-relaxed text-black/38">
+              “别只是拥有它，去见证它。”
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <EntryCard
-                icon={<Compass className="h-5 w-5" />}
-                title="市场监控"
-                desc="浏览真实在售卡牌，直接进入筛选与详情。"
-                href="/market"
-                strong
-              />
-              <EntryCard
-                icon={<FolderSearch className="h-5 w-5" />}
-                title="Collection"
-                desc="地址输入查询、缓存恢复与 modal 详情。"
-                href="/collection"
-              />
+            {/* 平台标识 — 内嵌在 Hero 区域 */}
+            <div className="mt-7 flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[9px] uppercase tracking-[0.26em] text-black/28 mr-1">监控平台</span>
+              {[{ label: "Renaiss", logo: "/renaiss-logo.png", live: true }, { label: "Collector Market", logo: "/collector-logo.png", live: false }].map((p) => (
+                <div
+                  key={p.label}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 ${
+                    p.live ? "border-emerald-500/25 bg-emerald-50" : "border-black/8 bg-white/60 opacity-60"
+                  }`}
+                >
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/8 bg-white shadow-sm">
+                    <img src={p.logo} alt={p.label} className="h-4 w-4 object-contain" />
+                  </div>
+                  <span className={`text-[11px] font-medium ${
+                    p.live ? "text-emerald-700" : "text-black/40"
+                  }`}>{p.label}</span>
+                  {p.live
+                    ? <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="font-mono text-[9px] text-emerald-600">Live</span></span>
+                    : <span className="font-mono text-[9px] text-black/28">即将</span>}
+                </div>
+              ))}
             </div>
           </motion.section>
 

@@ -674,6 +674,47 @@ export default function MarketLuxe() {
         )}
       </AnimatePresence>
 
+      {/* 平台监控标识区域 — 暖象牙色背景，显示当前监控的平台 */}
+      <div className="border-b border-[#ece5d8] bg-[#faf7f2] px-4 py-2.5 sm:px-5 lg:px-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#a89880]">当前监控平台</span>
+          <div className="flex flex-wrap items-center gap-2">
+            {platforms.map((platform) => (
+              <div
+                key={platform.id}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                  platform.live
+                    ? "border-[#b8e4c8] bg-[#edf9f2]"
+                    : "border-[#e0d8cc] bg-[#faf7f2] opacity-60"
+                }`}
+              >
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#e0d8cc] bg-white">
+                  <img
+                    src={platform.logo}
+                    alt={platform.label}
+                    className="h-4 w-4 object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                </div>
+                <span className={`text-[11px] font-medium ${
+                  platform.live ? "text-[#2d7a4f]" : "text-[#a89880]"
+                }`}>
+                  {platform.label}
+                </span>
+                {platform.live ? (
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#4a9e6a] animate-pulse" />
+                    <span className="font-mono text-[9px] text-[#4a9e6a]">Live</span>
+                  </span>
+                ) : (
+                  <span className="font-mono text-[9px] text-[#a89880]">即将上线</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <main className="w-full px-4 py-5 sm:px-5 lg:px-6">
         <section className="grid gap-4 xl:grid-cols-[268px_minmax(0,1fr)] 2xl:grid-cols-[288px_minmax(0,1fr)]">
           {/* 左侧筛选栏 — 桌面端 */}

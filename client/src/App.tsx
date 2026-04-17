@@ -12,6 +12,7 @@ import MyCollection from "./pages/MyCollection";
 import MarketLuxe from "./pages/MarketLuxe";
 import Roadmap from "./pages/Roadmap";
 import Compliance from "./pages/Compliance";
+import Features from "./pages/Features";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/market" component={MarketLuxe} />
       <Route path="/collection" component={MyCollection} />
       <Route path="/my-collection" component={MyCollection} />
+      <Route path="/features" component={Features} />
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/compliance" component={Compliance} />
       <Route path="/404" component={NotFound} />
