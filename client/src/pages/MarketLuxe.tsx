@@ -335,7 +335,7 @@ export default function MarketLuxe() {
   } = useRenaissData();
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [selectedPlatform, setSelectedPlatform] = useState<PlatformId>("renaiss");
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<PlatformId>>(new Set(["renaiss"]));
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
   const [graderFilter, setGraderFilter] = useState("all");
@@ -344,12 +344,29 @@ export default function MarketLuxe() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
+  // 多选平台逻辑：至少保留一个选中
+  const togglePlatform = (id: PlatformId) => {
+    setSelectedPlatforms((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        if (next.size > 1) next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  // 只要选中了 collector 且没有 renaiss，才算 comingSoon
+  const onlyCollectorSelected = selectedPlatforms.has("collector") && !selectedPlatforms.has("renaiss");
+  const isComingSoon = onlyCollectorSelected;
+  // 兼容旧变量名
+  const selectedPlatform = selectedPlatforms.has("renaiss") ? "renaiss" : "collector";
   const platformMeta = platforms.find((item) => item.id === selectedPlatform) ?? platforms[0];
-  const isComingSoon = selectedPlatform === "collector";
 
   useEffect(() => {
     setVisibleCount(PAGE_STEP);
-  }, [filters, selectedPlatform]);
+  }, [filters, selectedPlatforms]);
 
   useEffect(() => {
     const target = loadMoreRef.current;
@@ -391,47 +408,31 @@ export default function MarketLuxe() {
       {/* 平台选择 */}
       <div>
         <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.28em] text-[#a89880]">平台</div>
-        <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
           {platforms.map((platform) => {
-            const active = selectedPlatform === platform.id;
+            const active = selectedPlatforms.has(platform.id);
             return (
               <button
                 key={platform.id}
-                onClick={() => setSelectedPlatform(platform.id)}
-                className={`w-full rounded-[1.15rem] border px-3 py-2.5 text-left transition-all duration-250 ${
+                onClick={() => togglePlatform(platform.id)}
+                title={`${platform.label} · ${platform.status}`}
+                className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border-2 transition-all duration-200 ${
                   active
-                    ? "border-[#1a1612] bg-[#1a1612] text-white shadow-[0_14px_36px_rgba(26,22,18,0.16)]"
-                    : "border-[#e0d8cc] bg-[#faf7f2] text-[#1a1612] hover:bg-white hover:border-[#c8b898]"
+                    ? platform.live
+                      ? "border-[#4a9e6a] bg-white shadow-[0_2px_14px_rgba(74,158,106,0.28)]"
+                      : "border-[#1a1612] bg-white shadow-[0_2px_14px_rgba(26,22,18,0.2)]"
+                    : "border-[#e0d8cc] bg-white/60 opacity-45 hover:opacity-75"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border ${
-                      active ? "border-white/12 bg-white/10" : "border-[#e0d8cc] bg-white"
-                    }`}
-                  >
-                    <img
-                      src={platform.logo}
-                      alt={platform.label}
-                      className="h-7 w-7 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className={`text-[13px] font-semibold ${active ? "text-white" : "text-[#1a1612]"}`}>
-                      {platform.label}
-                    </div>
-                    <div
-                      className={`mt-0.5 text-[11px] ${
-                        active ? "text-white/55" : platform.live ? "text-[#4a9e6a]" : "text-[#a89880]"
-                      }`}
-                    >
-                      {platform.status}
-                    </div>
-                  </div>
-                </div>
+                <img
+                  src={platform.logo}
+                  alt={platform.label}
+                  className="h-7 w-7 object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+                {platform.live && (
+                  <span className="absolute bottom-0.5 right-0.5 h-2 w-2 rounded-full bg-[#4a9e6a] ring-1 ring-white animate-pulse" />
+                )}
               </button>
             );
           })}
@@ -674,43 +675,39 @@ export default function MarketLuxe() {
         )}
       </AnimatePresence>
 
-      {/* 平台监控标识区域 — 暖象牙色背景，显示当前监控的平台 */}
-      <div className="border-b border-[#ece5d8] bg-[#faf7f2] px-4 py-2.5 sm:px-5 lg:px-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#a89880]">当前监控平台</span>
-          <div className="flex flex-wrap items-center gap-2">
-            {platforms.map((platform) => (
-              <div
-                key={platform.id}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
-                  platform.live
-                    ? "border-[#b8e4c8] bg-[#edf9f2]"
-                    : "border-[#e0d8cc] bg-[#faf7f2] opacity-60"
-                }`}
-              >
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#e0d8cc] bg-white">
+      {/* 平台监控标识区域 — 纯 logo 小图标，紧凑可扩展 */}
+      <div className="border-b border-[#ece5d8] bg-[#faf7f2] px-4 py-3 sm:px-5 lg:px-6">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#a89880] shrink-0">监控平台</span>
+          <div className="flex items-center gap-2">
+            {platforms.map((platform) => {
+              const active = selectedPlatforms.has(platform.id);
+              return (
+                <button
+                  key={platform.id}
+                  onClick={() => togglePlatform(platform.id)}
+                  title={`${platform.label} · ${platform.status}`}
+                  className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[0.7rem] border-2 transition-all duration-200 ${
+                    active
+                      ? platform.live
+                        ? "border-[#4a9e6a] bg-white shadow-[0_2px_12px_rgba(74,158,106,0.25)]"
+                        : "border-[#1a1612] bg-white shadow-[0_2px_12px_rgba(26,22,18,0.18)]"
+                      : "border-[#e0d8cc] bg-white/60 opacity-40 hover:opacity-70"
+                  }`}
+                >
                   <img
                     src={platform.logo}
                     alt={platform.label}
-                    className="h-4 w-4 object-contain"
+                    className="h-6 w-6 object-contain"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
-                </div>
-                <span className={`text-[11px] font-medium ${
-                  platform.live ? "text-[#2d7a4f]" : "text-[#a89880]"
-                }`}>
-                  {platform.label}
-                </span>
-                {platform.live ? (
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#4a9e6a] animate-pulse" />
-                    <span className="font-mono text-[9px] text-[#4a9e6a]">Live</span>
-                  </span>
-                ) : (
-                  <span className="font-mono text-[9px] text-[#a89880]">即将上线</span>
-                )}
-              </div>
-            ))}
+                  {/* Live 绿点 */}
+                  {platform.live && (
+                    <span className="absolute bottom-0.5 right-0.5 h-2 w-2 rounded-full bg-[#4a9e6a] ring-1 ring-white animate-pulse" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
