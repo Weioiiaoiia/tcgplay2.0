@@ -1,0 +1,5 @@
+Collection 页浏览器检查结论：
+1. /collection 路由已恢复，不再跳到 404。
+2. 页面仍然保留地址输入查询入口，符合“Collection 页还是地址输入查询吗？”这一硬性标准。
+3. 顶部导航、Address Query 状态徽标、双栏布局、钱包地址输入框和连接按钮已经套入新的浅色高端视觉系统。
+4. 下一步需要继续验证：输入真实地址后的集合浏览是否正常，Collection 详情是否仍然以 modal 方式打开，并统一 Card Detail / Roadmap / Compliance 的视觉语言。

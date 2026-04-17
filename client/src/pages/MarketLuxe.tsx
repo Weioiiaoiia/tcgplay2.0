@@ -15,12 +15,14 @@ import {
   Search,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import CardDetailModal from "@/components/collection/CardDetail";
 import { useRenaissData, type SortBy } from "@/hooks/useRenaissData";
 import {
   getGradeBg,
   getGradeColor,
   getRenaissCardUrl,
   getRenaissImageUrl,
+  type CardData,
   type RenaissCard,
 } from "@/lib/renaissApi";
 
@@ -183,6 +185,29 @@ function MarketListCard({ card, onOpen }: { card: RenaissCard; onOpen: () => voi
   );
 }
 
+function toCardDetailData(card: RenaissCard): CardData {
+  return {
+    id: card.id,
+    tokenId: card.tokenId,
+    name: card.name,
+    ownerAddress: card.ownerAddress,
+    fmvPriceInUSD: String(card.fmvPriceUSD),
+    frontImageUrl: card.frontImageUrl,
+    backImageUrl: null,
+    serial: card.serial,
+    grade: card.grade,
+    year: card.year,
+    setName: card.setName,
+    cardNumber: card.cardNumber,
+    pokemonName: card.pokemonName || card.name,
+    language: card.language,
+    gradingCompany: card.gradingCompany,
+    vaultLocation: "platform",
+    askPriceInUSDT: String(card.askPriceUSDT),
+    type: card.category,
+  };
+}
+
 export default function MarketLuxe() {
   const [, navigate] = useLocation();
   const {
@@ -200,6 +225,7 @@ export default function MarketLuxe() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformId>("renaiss");
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
+  const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const platformMeta = platforms.find((item) => item.id === selectedPlatform) ?? platforms[0];
@@ -243,8 +269,8 @@ export default function MarketLuxe() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,rgba(252,250,244,1),rgba(246,244,238,1))] text-zinc-900">
-      <header className="sticky top-0 z-50 border-b border-black/6 bg-[rgba(251,249,244,0.78)] backdrop-blur-2xl">
-        <div className="container flex flex-col gap-4 py-4 xl:flex-row xl:items-center xl:justify-between">
+      <header className="sticky top-0 z-50 border-b border-black/6 bg-[rgba(251,249,244,0.82)] backdrop-blur-2xl">
+        <div className="w-full px-4 py-4 sm:px-5 lg:px-6 xl:flex xl:items-center xl:justify-between xl:gap-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/")}
@@ -260,18 +286,18 @@ export default function MarketLuxe() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-[1.25rem] border border-black/8 bg-white/78 px-4 py-3 shadow-[0_12px_40px_rgba(30,41,59,0.06)]">
+          <div className="mt-4 grid gap-x-5 gap-y-3 sm:grid-cols-2 xl:mt-0 xl:grid-cols-4 xl:items-end">
+            <div className="px-1 py-1">
               <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-400">Platform</span>
               <strong className="mt-2 block font-mono text-xl text-zinc-950">{platformMeta.label}</strong>
             </div>
-            <div className="rounded-[1.25rem] border border-black/8 bg-white/78 px-4 py-3 shadow-[0_12px_40px_rgba(30,41,59,0.06)]">
+            <div className="px-1 py-1 xl:border-l xl:border-black/8 xl:pl-5">
               <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-400">Listed</span>
               <strong className="mt-2 block font-mono text-xl text-zinc-950">
                 {isComingSoon ? "Soon" : totalCount.toLocaleString()}
               </strong>
             </div>
-            <div className="rounded-[1.25rem] border border-black/8 bg-white/78 px-4 py-3 shadow-[0_12px_40px_rgba(30,41,59,0.06)]">
+            <div className="px-1 py-1 xl:border-l xl:border-black/8 xl:pl-5">
               <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-400">Updated</span>
               <strong className="mt-2 block font-mono text-xl text-zinc-950">
                 {isComingSoon ? "--:--" : formatTime(lastUpdated)}
@@ -280,7 +306,7 @@ export default function MarketLuxe() {
             <button
               onClick={() => refreshData()}
               disabled={loading || isComingSoon}
-              className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-black/8 bg-white/78 px-4 py-3 text-sm font-medium text-zinc-700 shadow-[0_12px_40px_rgba(30,41,59,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-45"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white/72 px-4 py-3 text-sm font-medium text-zinc-700 shadow-[0_10px_28px_rgba(30,41,59,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-45 xl:justify-self-end"
             >
               <RefreshCw className={`h-4 w-4 ${loading && !isComingSoon ? "animate-spin" : ""}`} />
               手动刷新
@@ -289,10 +315,10 @@ export default function MarketLuxe() {
         </div>
       </header>
 
-      <main className="container py-8">
-        <section className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)]">
+      <main className="w-full px-4 py-6 sm:px-5 lg:px-6">
+        <section className="grid gap-4 xl:grid-cols-[290px_minmax(0,1fr)] 2xl:grid-cols-[310px_minmax(0,1fr)]">
           <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
-            <section className="rounded-[1.6rem] border border-black/8 bg-white/82 p-4 shadow-[0_18px_55px_rgba(30,41,59,0.07)]">
+            <section className="rounded-[1.45rem] bg-white/72 p-4 shadow-[0_16px_38px_rgba(30,41,59,0.05)] ring-1 ring-black/4">
               <div className="text-[11px] uppercase tracking-[0.24em] text-zinc-400">Platforms</div>
               <div className="mt-4 space-y-3">
                 {platforms.map((platform) => {
@@ -324,7 +350,7 @@ export default function MarketLuxe() {
               </div>
             </section>
 
-            <section className="rounded-[1.6rem] border border-black/8 bg-white/82 p-4 shadow-[0_18px_55px_rgba(30,41,59,0.07)]">
+            <section className="rounded-[1.45rem] bg-white/72 p-4 shadow-[0_16px_38px_rgba(30,41,59,0.05)] ring-1 ring-black/4">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-[11px] uppercase tracking-[0.24em] text-zinc-400">Filters</div>
                 <button
@@ -452,17 +478,17 @@ export default function MarketLuxe() {
           </aside>
 
           <section className="min-w-0">
-            <div className="rounded-[1.6rem] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_18px_55px_rgba(30,41,59,0.07)] sm:px-5">
+            <div className="px-1 py-1 sm:px-0">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                  <span className="rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-1.5">
+                  <span className="rounded-full bg-[#f6f2eb] px-3 py-1.5">
                     {platformMeta.label}
                   </span>
-                  <span className="rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-1.5">
+                  <span className="rounded-full bg-[#f6f2eb] px-3 py-1.5">
                     {isComingSoon ? "Coming soon" : `${cards.length} 条结果`}
                   </span>
                   {!isComingSoon ? (
-                    <span className="rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-1.5">
+                    <span className="rounded-full bg-[#f6f2eb] px-3 py-1.5">
                       {viewMode === "grid" ? "网格浏览" : "列表浏览"}
                     </span>
                   ) : null}
@@ -474,13 +500,13 @@ export default function MarketLuxe() {
                       href="https://www.renaiss.xyz/marketplace"
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3.5 py-2 text-sm font-medium text-zinc-700 transition hover:text-zinc-950"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-zinc-700 shadow-[0_10px_24px_rgba(30,41,59,0.05)] transition hover:text-zinc-950"
                     >
                       打开官方市场
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   ) : null}
-                  <div className="inline-flex rounded-full border border-black/8 bg-zinc-50 p-1">
+                  <div className="inline-flex rounded-full bg-zinc-50/92 p-1 shadow-[inset_0_0_0_1px_rgba(24,24,27,0.06)]">
                     <button
                       onClick={() => setViewMode("grid")}
                       disabled={isComingSoon}
@@ -558,13 +584,13 @@ export default function MarketLuxe() {
                           <MarketGridCard
                             key={card.tokenId}
                             card={card}
-                            onOpen={() => navigate(`/card/${card.tokenId}`)}
+                            onOpen={() => setSelectedCard(toCardDetailData(card))}
                           />
                         ) : (
                           <MarketListCard
                             key={card.tokenId}
                             card={card}
-                            onOpen={() => navigate(`/card/${card.tokenId}`)}
+                            onOpen={() => setSelectedCard(toCardDetailData(card))}
                           />
                         )
                       )}
@@ -596,6 +622,8 @@ export default function MarketLuxe() {
             </div>
           </section>
         </section>
+
+        <CardDetailModal card={selectedCard} onClose={() => setSelectedCard(null)} />
 
         {!!cards.length && !isComingSoon && cards[0] ? (
           <section className="pb-10 pt-6">

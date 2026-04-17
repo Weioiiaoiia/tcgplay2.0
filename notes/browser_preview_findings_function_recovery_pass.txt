@@ -1,0 +1,6 @@
+功能恢复轮次浏览器检查结论：
+1. 首页已从长叙事展示稿收敛为功能入口页，首屏直接提供 Market、Collection、Roadmap、Compliance 四个入口，并保留实时市场统计与真实卡牌承接。
+2. /roadmap 路由已恢复为真实页面，能够直接查看 live / planned 能力矩阵，不再只是首页中的说明区块。
+3. /compliance 路由已恢复为真实页面，能够直接看到隐私、条款、IP、联系入口与数据来源入口，不再只是首页中的介绍文案。
+4. 首页底部 Footer 仍然保留 legal dialog 触发按钮与联系入口，合规语义没有被删除。
+5. 下一步应继续验证 compliance 页底部 legal dialog 的交互与首页/Collection/Market 的功能一致性，然后准备向用户回报本轮“功能找回”进展。
