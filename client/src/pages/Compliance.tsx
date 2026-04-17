@@ -79,7 +79,7 @@ export default function Compliance() {
                 <div className="mt-1 text-sm leading-7 text-black/46">通过邮件直达联系渠道。</div>
               </a>
               <a
-                href="https://www.renaiss.xyz/marketplace"
+                href="https://www.renaiss.xyz/ref/77ouo"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-[1.4rem] border border-black/8 bg-[#f7f3ed] px-4 py-4 transition hover:bg-white"

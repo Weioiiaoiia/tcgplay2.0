@@ -19,9 +19,12 @@ export interface Filters {
   search: string;
   category: string;
   gradeFilter: string;
+  graderCompany: string;
   priceMin: number;
   priceMax: number;
   language: string;
+  yearFrom: string;
+  yearTo: string;
   sortBy: SortBy;
 }
 
@@ -29,9 +32,12 @@ const DEFAULT_FILTERS: Filters = {
   search: "",
   category: "all",
   gradeFilter: "all",
+  graderCompany: "all",
   priceMin: 0,
   priceMax: 100000,
   language: "all",
+  yearFrom: "",
+  yearTo: "",
   sortBy: "newest",
 };
 
@@ -77,6 +83,13 @@ export function useRenaissData() {
       result = result.filter((c) => c.grade.includes(filters.gradeFilter));
     }
 
+    // Grader company (PSA / BGS / CGC / TAG)
+    if (filters.graderCompany !== "all") {
+      result = result.filter(
+        (c) => c.gradingCompany.toUpperCase() === filters.graderCompany.toUpperCase()
+      );
+    }
+
     // Price
     result = result.filter(
       (c) =>
@@ -87,6 +100,20 @@ export function useRenaissData() {
     // Language
     if (filters.language !== "all") {
       result = result.filter((c) => c.language === filters.language);
+    }
+
+    // Year range
+    if (filters.yearFrom) {
+      const from = parseInt(filters.yearFrom);
+      if (!isNaN(from)) {
+        result = result.filter((c) => parseInt(c.year) >= from);
+      }
+    }
+    if (filters.yearTo) {
+      const to = parseInt(filters.yearTo);
+      if (!isNaN(to)) {
+        result = result.filter((c) => parseInt(c.year) <= to);
+      }
     }
 
     // Sort

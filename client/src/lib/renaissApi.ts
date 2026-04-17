@@ -294,9 +294,9 @@ export function getGradeBg(grade: string): string {
   return "bg-white/60 border-black/8";
 }
 
-// Renaiss 官网卡牌 URL
-export function getRenaissCardUrl(tokenId: string): string {
-  return `https://www.renaiss.xyz/card/${tokenId}`;
+// Renaiss 官网卡牌 URL（含邀请码）
+export function getRenaissCardUrl(_tokenId: string): string {
+  return `https://www.renaiss.xyz/ref/77ouo`;
 }
 
 // PSA 官网 URL

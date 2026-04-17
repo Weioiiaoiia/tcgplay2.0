@@ -73,7 +73,7 @@ function Navbar({
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           </button>
           <a
-            href="https://www.renaiss.xyz/marketplace"
+            href="https://www.renaiss.xyz/ref/77ouo"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3 py-1.5 rounded-lg bg-white/[0.05] text-[11px] text-white/50 font-medium hover:bg-white/[0.08] hover:text-white/70 transition-all flex items-center gap-1"

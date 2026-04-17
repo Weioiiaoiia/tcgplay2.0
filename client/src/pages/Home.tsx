@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Compass, FolderSearch, RefreshCw } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import Footer from "@/components/Footer";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useCardData } from "@/contexts/CardDataContext";
 import { getRenaissImageUrl, type RenaissCard } from "@/lib/renaissApi";
 
@@ -125,7 +126,7 @@ export default function Home() {
       <div className="absolute inset-x-0 top-0 -z-10 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(214,195,155,0.18),transparent_38%),radial-gradient(circle_at_top_right,rgba(119,134,157,0.1),transparent_32%)]" />
 
       <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between rounded-full border border-black/8 bg-white/78 px-4 py-3 shadow-[0_18px_60px_-36px_rgba(24,24,27,0.32)] backdrop-blur-xl sm:px-6">
+        <div className="mx-auto flex max-w-full items-center justify-between rounded-full border border-black/8 bg-white/78 px-4 py-3 shadow-[0_18px_60px_-36px_rgba(24,24,27,0.32)] backdrop-blur-xl sm:px-6">
           <button
             className="flex items-center gap-3"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -138,7 +139,7 @@ export default function Home() {
 
           <nav className="hidden items-center gap-7 text-sm text-black/56 md:flex">
             <Link href="/market" className="transition hover:text-black">
-              Market
+              市场监控
             </Link>
             <Link href="/collection" className="transition hover:text-black">
               Collection
@@ -146,6 +147,10 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* 语言切换 — 适配暖色主题，覆盖 dark 样式 */}
+            <div className="[&_button]:!border-black/8 [&_button]:!bg-white/70 [&_button]:!text-black/60 [&_button:hover]:!bg-black/6 [&_button:hover]:!text-black [&_.absolute]:!bg-[#fbf8f2] [&_.absolute]:!border-black/8 [&_.absolute]:!shadow-[0_16px_48px_-12px_rgba(24,24,27,0.18)] [&_.absolute_button]:!text-black/60 [&_.absolute_button:hover]:!bg-black/5 [&_.absolute_button:hover]:!text-black/90 [&_.absolute_button.bg-white\/\[0\.08\]]:!bg-black/6 [&_.absolute_button.bg-white\/\[0\.08\]]:!text-black">
+              <LanguageSwitcher />
+            </div>
             <button
               onClick={() => refreshData()}
               disabled={loading}
@@ -165,7 +170,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="container pb-14 pt-8 sm:pt-10">
+      <main className="container pb-14 pt-8 sm:pt-10 lg:px-6">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,0.64fr)_minmax(0,0.36fr)]">
           <motion.section
             initial={{ opacity: 0, y: 18 }}
@@ -178,13 +183,13 @@ export default function Home() {
               TCGPlay 2.0
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-black/48 sm:text-[0.96rem]">
-              直接进入 Market 和 Collection，首页只保留必要状态与真实市场预览。
+              直接进入市场监控和 Collection，首页只保留必要状态与实时市场数据。
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <EntryCard
                 icon={<Compass className="h-5 w-5" />}
-                title="Market"
+                title="市场监控"
                 desc="浏览真实在售卡牌，直接进入筛选与详情。"
                 href="/market"
                 strong
@@ -230,14 +235,14 @@ export default function Home() {
         <section className="mt-6 rounded-[2rem] border border-black/8 bg-white/84 p-5 shadow-[0_28px_100px_-48px_rgba(24,24,27,0.32)] backdrop-blur-xl sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Live Market Preview</div>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">真实市场预览</h2>
+              <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Live Market Monitor</div>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">市场监控</h2>
             </div>
             <Link
               href="/market"
               className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-black"
             >
-              打开完整 Market
+              打开
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

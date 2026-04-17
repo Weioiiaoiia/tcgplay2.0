@@ -262,7 +262,7 @@ export default function CardGrid({
                 缓存恢复、手动刷新和结果浏览保持不变，只把入口放得更直接。
               </p>
               <a
-                href="https://www.renaiss.xyz/marketplace"
+                href="https://www.renaiss.xyz/ref/77ouo"
                 target="_blank"
                 rel="noreferrer"
                 className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-black/70 transition hover:text-black"

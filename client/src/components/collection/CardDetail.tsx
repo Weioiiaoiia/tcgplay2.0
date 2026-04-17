@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, ExternalLink, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, Copy, ExternalLink, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { parseFMV, getGradeNumber, getPSAUrl, getRenaissUrl, type CardData } from "@/lib/renaissApi";
 
@@ -22,11 +22,37 @@ function formatMoney(value: number) {
   })}`;
 }
 
+/** 收藏状态持久化到 localStorage */
+const FAVORITES_KEY = "tcgplay2_favorites";
+
+function getFavorites(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function toggleFavorite(tokenId: string): boolean {
+  const favs = getFavorites();
+  const idx = favs.indexOf(tokenId);
+  if (idx === -1) {
+    favs.push(tokenId);
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+    return true;
+  } else {
+    favs.splice(idx, 1);
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+    return false;
+  }
+}
+
 export default function CardDetail({ card, onClose }: Props) {
   const { t } = useTranslation();
   const imgElRef = useRef<HTMLImageElement>(null);
   const [isTouch, setIsTouch] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
   const [magnifier, setMagnifier] = useState({ show: false, x: 0, y: 0, bgX: 0, bgY: 0 });
   const magnifierSize = 180;
   const zoomLevel = 3;
@@ -35,17 +61,24 @@ export default function CardDetail({ card, onClose }: Props) {
     setIsTouch("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
+  // 每次打开新卡牌时同步收藏状态
   useEffect(() => {
     if (card) {
       document.body.style.overflow = "hidden";
+      setIsFavorited(getFavorites().includes(card.tokenId));
     } else {
       document.body.style.overflow = "";
       setCopied(false);
     }
-
     return () => {
       document.body.style.overflow = "";
     };
+  }, [card]);
+
+  const handleFavorite = useCallback(() => {
+    if (!card) return;
+    const newState = toggleFavorite(card.tokenId);
+    setIsFavorited(newState);
   }, [card]);
 
   const handleMagnifierMove = useCallback(
@@ -128,6 +161,7 @@ export default function CardDetail({ card, onClose }: Props) {
           if (event.target === event.currentTarget) onClose();
         }}
       >
+        {/* 关闭按钮 */}
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 rounded-full border border-black/8 bg-white/78 p-2 text-black/40 shadow-[0_12px_30px_rgba(20,20,20,0.08)] transition-all duration-300 hover:bg-white hover:text-black/70 sm:right-6 sm:top-6"
@@ -140,20 +174,19 @@ export default function CardDetail({ card, onClose }: Props) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.985 }}
           transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-          className="max-h-[88vh] w-full max-w-[1100px] overflow-y-auto rounded-[1.65rem] border border-[#e6dfd2] bg-[#fbf8f1] shadow-[0_30px_90px_-36px_rgba(30,24,14,0.24)]"
+          className="w-full max-w-[860px] overflow-hidden rounded-[1.5rem] border border-[#e6dfd2] bg-[#fbf8f1] shadow-[0_30px_90px_-36px_rgba(30,24,14,0.24)]"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr]">
-            <div className="border-b border-[#ece5d8] bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),rgba(245,239,227,0.94)_55%,rgba(241,234,220,0.98))] px-4 py-5 sm:px-6 sm:py-6 lg:min-h-[660px] lg:border-b-0 lg:border-r">
-              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.32em] text-black/28">
-                Private Viewing Room
-              </p>
-              <div className="flex min-h-[470px] items-center justify-center rounded-[1.5rem] border border-[#ece5d8] bg-[linear-gradient(180deg,rgba(255,255,255,0.7),rgba(245,239,227,0.88))] px-4 py-6 sm:px-6">
-                <div className="relative flex w-full max-w-[360px] items-center justify-center rounded-[1.35rem] bg-[#161616] px-6 py-7 shadow-[0_24px_56px_rgba(22,22,22,0.16)]">
+          {/* 左侧图片区与右侧信息区等高 */}
+          <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1fr]">
+            {/* 左侧：卡牌展示区 — 占满全高 */}
+            <div className="flex flex-col border-b border-[#ece5d8] bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),rgba(245,239,227,0.94)_55%,rgba(241,234,220,0.98))] px-4 py-4 sm:px-5 sm:py-5 lg:absolute lg:inset-y-0 lg:left-0 lg:w-1/2 lg:border-b-0 lg:border-r">
+              <div className="flex flex-1 items-center justify-center rounded-[1.3rem] border border-[#ece5d8] bg-[linear-gradient(180deg,rgba(255,255,255,0.7),rgba(245,239,227,0.88))] px-3 py-5 sm:px-4">
+                <div className="relative flex w-full max-w-[320px] items-center justify-center rounded-[1.15rem] bg-[#161616] px-5 py-6 shadow-[0_20px_48px_rgba(22,22,22,0.18)]">
                   <img
                     ref={imgElRef}
                     src={card.frontImageUrl}
                     alt={card.pokemonName}
-                    className={`max-h-[52vh] max-w-full object-contain ${isTouch ? "" : "cursor-crosshair"}`}
+                    className={`max-h-[46vh] max-w-full object-contain ${isTouch ? "" : "cursor-crosshair"}`}
                     draggable={false}
                     onMouseMove={handleMagnifierMove}
                     onMouseLeave={handleMagnifierLeave}
@@ -186,66 +219,92 @@ export default function CardDetail({ card, onClose }: Props) {
               )}
             </div>
 
-            <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-6 lg:py-7">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-[#ecd98f] bg-[#f4dc8c]/55 px-2.5 py-0.5 text-[10px] font-semibold text-[#6e5718] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
-                  PSA {gradeNum} {normalizedGrade}
-                </span>
-                <span className="text-[12px] text-black/34">
-                  {card.year} · {card.language}
-                </span>
+            {/* 右侧：信息区 — 独立滚动 */}
+            <div className="max-h-[82vh] overflow-y-auto px-4 py-3 sm:px-5 sm:py-3 lg:col-start-2 lg:px-5 lg:py-4">
+              {/* 顶部：等级徽章 + 收藏按钮 */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="rounded-full border border-[#ecd98f] bg-[#f4dc8c]/55 px-2.5 py-0.5 text-[10px] font-semibold text-[#6e5718] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+                    PSA {gradeNum} {normalizedGrade}
+                  </span>
+                  <span className="text-[12px] text-black/34">
+                    {card.year} · {card.language}
+                  </span>
+                </div>
+
+                {/* 收藏按钮 */}
+                <motion.button
+                  onClick={handleFavorite}
+                  whileTap={{ scale: 0.88 }}
+                  title={isFavorited ? "取消收藏" : "收藏此卡"}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-all duration-200 ${
+                    isFavorited
+                      ? "border-[#ecd98f] bg-[#f4dc8c]/40 text-[#6e5718] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
+                      : "border-[#e7dece] bg-white/60 text-black/40 hover:border-[#ecd98f] hover:bg-[#f4dc8c]/20 hover:text-[#6e5718]"
+                  }`}
+                >
+                  {isFavorited ? (
+                    <BookmarkCheck className="h-3.5 w-3.5" />
+                  ) : (
+                    <Bookmark className="h-3.5 w-3.5" />
+                  )}
+                  {isFavorited ? "已收藏" : "收藏"}
+                </motion.button>
               </div>
 
-              <h2 className="mt-3 text-[1.9rem] font-semibold tracking-[-0.055em] text-[#171411] sm:text-[2.45rem]">
+              <h2 className="mt-2 text-[1.5rem] font-semibold tracking-[-0.045em] text-[#171411] sm:text-[1.7rem]">
                 {card.pokemonName}
               </h2>
-              <p className="mt-2 text-[13px] text-black/36">
+              <p className="mt-1 text-[12px] text-black/36">
                 {card.setName} · Card #{card.cardNumber}
               </p>
 
-              <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div className="rounded-[1.3rem] border border-[#e7dece] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(245,239,227,0.9))] p-4 shadow-[0_8px_22px_rgba(40,32,20,0.04)]">
-                  <div className="font-mono text-[11px] uppercase tracking-[0.28em] text-black/24">
+              {/* 价格区 */}
+              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div className="rounded-[1.1rem] border border-[#e7dece] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(245,239,227,0.9))] px-3 py-2.5 shadow-[0_8px_22px_rgba(40,32,20,0.04)]">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-black/24">
                     Fair Market Value
                   </div>
-                  <div className="mt-2 text-[1.8rem] font-semibold tracking-[-0.04em] text-[#171411]">
+                  <div className="mt-1 text-[1.35rem] font-semibold tracking-[-0.04em] text-[#171411]">
                     {formatMoney(fmv)}
                   </div>
-                  <div className="mt-1.5 text-[11px] text-black/34">基于 Renaiss 实时市场定价</div>
+                  <div className="mt-0.5 text-[10px] text-black/34">基于 Renaiss 实时市场定价</div>
                 </div>
-                <div className="rounded-[1.3rem] border border-[#e7dece] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(245,239,227,0.9))] p-4 shadow-[0_8px_22px_rgba(40,32,20,0.04)]">
-                  <div className="font-mono text-[11px] uppercase tracking-[0.28em] text-black/24">
+                <div className="rounded-[1.1rem] border border-[#e7dece] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(245,239,227,0.9))] px-3 py-2.5 shadow-[0_8px_22px_rgba(40,32,20,0.04)]">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-black/24">
                     Ask Price
                   </div>
-                  <div className="mt-2 text-[1.8rem] font-semibold tracking-[-0.04em] text-[#171411]">
+                  <div className="mt-1 text-[1.35rem] font-semibold tracking-[-0.04em] text-[#171411]">
                     {formatMoney(ask)}
                   </div>
-                  <div className="mt-1.5 text-[11px] text-black/34">当前市场挂售价格</div>
+                  <div className="mt-0.5 text-[10px] text-black/34">当前市场挂售价格</div>
                 </div>
               </div>
 
-              <div className="mt-6">
-                <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.24em] text-black/24">
+              {/* 属性列表 */}
+              <div className="mt-3">
+                <div className="mb-1.5 text-[10px] font-mono uppercase tracking-[0.24em] text-black/24">
                   Card Attributes
                 </div>
-                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                   {attributes.map((attr) => (
                     <div
                       key={attr.label}
-                      className="rounded-[1.05rem] border border-[#ece3d4] bg-white/62 px-3.5 py-3 shadow-[0_6px_16px_rgba(40,32,20,0.03)]"
+                      className="rounded-[0.9rem] border border-[#ece3d4] bg-white/62 px-3 py-2 shadow-[0_6px_16px_rgba(40,32,20,0.03)]"
                     >
-                      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-black/24">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-black/24">
                         {attr.label}
                       </div>
-                      <div className="mt-2 break-all text-[13px] font-medium text-[#171411]">{attr.value}</div>
+                      <div className="mt-1 break-all text-[12px] font-medium text-[#171411]">{attr.value}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[1.15rem] border border-[#e8dfd0] bg-[linear-gradient(180deg,rgba(246,241,231,0.75),rgba(243,237,226,0.95))] px-3.5 py-3.5 shadow-[0_8px_20px_rgba(40,32,20,0.04)]">
-                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-black/24">Owner</div>
-                <div className="mt-2.5 flex items-center justify-between gap-3">
+              {/* Owner */}
+              <div className="mt-2 rounded-[1rem] border border-[#e8dfd0] bg-[linear-gradient(180deg,rgba(246,241,231,0.75),rgba(243,237,226,0.95))] px-3 py-2.5 shadow-[0_8px_20px_rgba(40,32,20,0.04)]">
+                <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-black/24">Owner</div>
+                <div className="mt-1.5 flex items-center justify-between gap-3">
                   <div className="text-[13px] font-medium text-[#171411]">{copied ? "已复制地址" : ownerDisplay}</div>
                   <button
                     type="button"
@@ -257,12 +316,13 @@ export default function CardDetail({ card, onClose }: Props) {
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {/* 操作按钮 */}
+              <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <a
                   href={getPSAUrl(card.serial)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#e5dbc8] bg-white text-[13px] font-semibold text-[#171411] transition hover:bg-[#f8f3ea]"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#e5dbc8] bg-white text-[12px] font-semibold text-[#171411] transition hover:bg-[#f8f3ea]"
                 >
                   <ExternalLink className="h-4 w-4" />
                   查看 PSA 官方记录
@@ -271,16 +331,19 @@ export default function CardDetail({ card, onClose }: Props) {
                   href={getRenaissUrl(card.tokenId)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#141414] text-[13px] font-semibold text-white transition hover:bg-[#232323]"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#141414] text-[12px] font-semibold text-white transition hover:bg-[#232323]"
                 >
                   <ExternalLink className="h-4 w-4" />
                   前往 Renaiss 页面
                 </a>
               </div>
 
-              <p className="mt-6 text-[11px] leading-5 text-black/26">
-                数据来源于 Renaiss Protocol 与 PSA 认证信息。当前弹窗保持轻量查看体验，关闭后会回到你刚刚浏览的市场位置。
-              </p>
+              {/* 免责声明 */}
+              <div className="mt-2 rounded-[0.85rem] border border-[#ece3d4]/80 bg-[#f9f5ee]/70 px-3 py-2">
+                <p className="text-[10px] leading-[1.85] text-black/32">
+                  数据来源于 Renaiss Protocol 与 PSA 认证信息，仅供参考，不构成投资建议。TCGPlay 与宝可梦公司（The Pokémon Company）及任何官方 IP 持有方无关联。
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>

@@ -166,11 +166,8 @@ export default function CardDetail() {
       </header>
 
       <main className="container grid min-h-[calc(100vh-6rem)] gap-6 pb-8 pt-8 xl:grid-cols-[0.95fr_1.05fr] xl:items-stretch">
+        {/* 左侧图片区 — 去掉 PRIVATE VIEWING ROOM 标题 */}
         <section className="relative overflow-hidden rounded-[2.2rem] border border-black/8 bg-white/78 p-5 shadow-[0_30px_100px_-48px_rgba(24,24,27,0.34)] backdrop-blur-xl sm:p-7 lg:p-8">
-          <div className="mb-5 flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.34em] text-black/34">
-            <span className="h-px w-10 bg-black/12" />
-            Private Viewing Room
-          </div>
           <div className="mx-auto flex h-full min-h-[24rem] items-center justify-center rounded-[1.8rem] bg-[radial-gradient(circle_at_top,rgba(214,195,155,0.24),transparent_50%),linear-gradient(180deg,#faf7f2,#f1ece4)] p-4 sm:p-8">
             <div className="w-full max-w-[26rem] overflow-hidden rounded-[1.4rem] border border-black/8 bg-white shadow-[0_26px_90px_-48px_rgba(24,24,27,0.35)]">
               <CardMagnifier
@@ -185,6 +182,7 @@ export default function CardDetail() {
           <p className="mt-4 text-center text-xs text-black/36">桌面端支持悬停放大查看卡面细节</p>
         </section>
 
+        {/* 右侧信息区 */}
         <section className="rounded-[2.2rem] border border-black/8 bg-white/82 p-6 shadow-[0_34px_100px_-46px_rgba(24,24,27,0.34)] backdrop-blur-xl sm:p-8">
           <div className="flex h-full flex-col gap-6">
             <div>
@@ -261,9 +259,12 @@ export default function CardDetail() {
               </a>
             </div>
 
-            <p className="mt-auto text-center text-xs leading-6 text-black/34">
-              数据来源 Renaiss Protocol 与 PSA 认证信息。界面风格已统一到当前改版语言，但保留原有详情字段、外链与可购买路径。
-            </p>
+            {/* 免责声明 */}
+            <div className="mt-2 rounded-[1.2rem] border border-black/6 bg-[#f6f2eb]/80 px-4 py-3.5">
+              <p className="text-[11px] leading-[1.8] text-black/38">
+                本页面数据来源于 Renaiss Protocol 与 PSA 认证信息，仅供参考，不构成任何投资建议。所展示卡牌为第三方平台上架商品，TCGPlay 不对价格准确性及交易结果承担责任。本产品与宝可梦公司（The Pokémon Company）及任何官方 IP 持有方无任何关联或背书。
+              </p>
+            </div>
           </div>
         </section>
       </main>
