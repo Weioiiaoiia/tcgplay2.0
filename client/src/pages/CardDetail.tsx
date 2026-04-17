@@ -1,41 +1,51 @@
 /**
- * 卡牌详情页 — 严格一屏显示，零滚动
- * 
- * 布局：左侧卡图 + 右侧信息，全部 h-screen 内展示
- * 右侧使用 flex-col justify-between 自动分配空间
+ * Design note — Fog-white precision exhibition system.
+ * This page should feel like a private viewing room: luminous, editorial,
+ * materially precise, and still fully functional for real card-detail review.
  */
-import { useState, useEffect, useMemo } from "react";
-import { ArrowLeft, ExternalLink, Copy, Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Check, Copy, ExternalLink } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import {
-  getGradeColor,
-  getGradeBg,
-  getRenaissCardUrl,
-  getPSAUrl,
   getGradeLevel,
+  getPSAUrl,
+  getRenaissCardUrl,
+  type RenaissCard,
 } from "@/lib/renaissApi";
-import type { RenaissCard } from "@/lib/renaissApi";
 import { useCardData } from "@/contexts/CardDataContext";
 import CardMagnifier from "@/components/CardMagnifier";
 
-/* ─── 复制按钮 ─── */
+function gradeBadgeClass(grade: string) {
+  const value = Number(grade.split(" ")[0]);
+  if (value >= 10) return "bg-amber-100 text-amber-900 border-amber-200";
+  if (value >= 9) return "bg-emerald-100 text-emerald-900 border-emerald-200";
+  if (value >= 8) return "bg-sky-100 text-sky-900 border-sky-200";
+  return "bg-neutral-200 text-neutral-800 border-neutral-300";
+}
+
+function formatMoney(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  return `$${value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
+
   return (
     <button
-      onClick={(e) => {
-        e.stopPropagation();
+      onClick={(event) => {
+        event.stopPropagation();
         navigator.clipboard.writeText(text);
         setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        setTimeout(() => setCopied(false), 1400);
       }}
-      className="p-1 rounded-md hover:bg-white/[0.06] transition-colors"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/8 bg-white text-black/60 transition hover:bg-black hover:text-white"
+      aria-label="复制地址"
     >
-      {copied ? (
-        <Check className="w-3 h-3 text-emerald-400" />
-      ) : (
-        <Copy className="w-3 h-3 text-white/20 hover:text-white/40" />
-      )}
+      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
     </button>
   );
 }
@@ -47,7 +57,7 @@ export default function CardDetail() {
 
   const cachedCard = useMemo(
     () => getCardByTokenId(params.tokenId),
-    [getCardByTokenId, params.tokenId]
+    [getCardByTokenId, params.tokenId],
   );
 
   const [apiCard, setApiCard] = useState<RenaissCard | null>(null);
@@ -71,23 +81,12 @@ export default function CardDetail() {
 
   const card = cachedCard || apiCard;
 
-  if (!initialLoaded && loading) {
+  if ((!initialLoaded && loading) || (!card && apiFetching)) {
     return (
-      <div className="h-screen bg-[#08080d] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-7 h-7 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin" />
-          <p className="text-[12px] text-white/25">加载卡牌数据...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!card && apiFetching) {
-    return (
-      <div className="h-screen bg-[#08080d] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-7 h-7 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin" />
-          <p className="text-[12px] text-white/25">获取卡牌详情...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f7f4ee_0%,#efeae1_100%)]">
+        <div className="flex flex-col items-center gap-4 rounded-[1.8rem] border border-black/8 bg-white/78 px-10 py-9 shadow-[0_30px_90px_-48px_rgba(24,24,27,0.35)] backdrop-blur-xl">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-black/10 border-t-black/70" />
+          <p className="text-sm text-black/50">正在整理卡牌详情数据…</p>
         </div>
       </div>
     );
@@ -95,14 +94,17 @@ export default function CardDetail() {
 
   if (!card) {
     return (
-      <div className="h-screen bg-[#08080d] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-white/30 text-[14px] mb-4">该卡牌当前未在市场上架</p>
+      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f7f4ee_0%,#efeae1_100%)] px-4">
+        <div className="w-full max-w-xl rounded-[2rem] border border-black/8 bg-white/80 p-10 text-center shadow-[0_30px_100px_-50px_rgba(24,24,27,0.34)] backdrop-blur-xl">
+          <p className="text-lg font-medium text-neutral-950">该卡牌当前未在市场上架</p>
+          <p className="mt-3 text-sm leading-7 text-black/46">
+            可能是缓存中不存在该 token，或者上游市场状态已经变化。你仍然可以返回市场继续浏览。
+          </p>
           <button
-            onClick={() => navigate("/")}
-            className="px-5 py-2 rounded-xl bg-white/[0.06] text-[12px] text-white/50 hover:text-white/70 hover:bg-white/[0.1] transition-all flex items-center gap-1.5 mx-auto"
+            onClick={() => navigate("/market")}
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-neutral-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-black"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="h-4 w-4" />
             返回市场
           </button>
         </div>
@@ -114,166 +116,157 @@ export default function CardDetail() {
   const psaUrl = getPSAUrl(card.serial);
   const gradeNum = card.grade.split(" ")[0];
   const gradeLabel = getGradeLevel(card.grade);
-  const shortName = card.pokemonName || card.name.split("#")[0]?.trim().replace(/^PSA\s+\d+\s+\w+\s+\w+\s+\d+\s+/, "");
+  const shortName =
+    card.pokemonName || card.name.split("#")[0]?.trim().replace(/^PSA\s+\d+\s+\w+\s+\w+\s+\d+\s+/, "");
+
+  const attrList = [
+    { label: "PSA Serial", value: card.serial },
+    { label: "Grade", value: `${gradeNum} ${gradeLabel}` },
+    { label: "Year", value: String(card.year) },
+    { label: "Language", value: card.language },
+    { label: "Set", value: card.setName },
+    { label: "Card Number", value: `#${card.cardNumber}` },
+    { label: "Grading Company", value: card.gradingCompany },
+    { label: "Vault Location", value: "Platform" },
+  ];
+
+  const ownerText = card.ownerUsername || card.ownerAddress;
 
   return (
-    <div className="h-screen bg-[#08080d] text-white overflow-hidden flex flex-col">
-      {/* ── 顶栏 44px ── */}
-      <nav className="shrink-0 h-11 bg-[#0b0b10]/95 backdrop-blur-xl border-b border-white/[0.05] z-50 flex items-center">
-        <div className="w-full max-w-[1440px] mx-auto px-5 sm:px-8 flex items-center justify-between">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f7f4ee_0%,#efeae1_44%,#f8f6f1_100%)] text-neutral-950">
+      <div className="absolute inset-x-0 top-0 -z-10 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(212,193,151,0.22),transparent_38%),radial-gradient(circle_at_top_right,rgba(119,134,157,0.12),transparent_30%)]" />
+
+      <header className="sticky top-0 z-40 px-4 pt-4 sm:px-6">
+        <div className="mx-auto flex max-w-[1360px] items-center justify-between rounded-full border border-black/8 bg-white/78 px-4 py-3 shadow-[0_18px_60px_-36px_rgba(24,24,27,0.32)] backdrop-blur-xl sm:px-6">
           <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors"
+            onClick={() => navigate("/market")}
+            className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-[#f6f2eb] px-3.5 py-2 text-sm font-medium text-black/68 transition hover:bg-black hover:text-white"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-[12px] font-medium">返回市场</span>
+            <ArrowLeft className="h-4 w-4" />
+            返回市场
           </button>
+
+          <div className="hidden items-center gap-3 sm:flex">
+            <div className="text-[0.64rem] uppercase tracking-[0.28em] text-black/34">Card Detail</div>
+            <div className={`rounded-full border px-3 py-1.5 text-[0.72rem] font-semibold ${gradeBadgeClass(card.grade)}`}>
+              PSA {gradeNum} {gradeLabel}
+            </div>
+          </div>
+
           <a
             href={renaissUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[12px] text-amber-400 font-medium hover:bg-amber-500/15 transition-all flex items-center gap-1.5"
+            className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-black"
           >
-            购买
-            <ExternalLink className="w-3 h-3" />
+            前往 Renaiss
+            <ExternalLink className="h-4 w-4" />
           </a>
         </div>
-      </nav>
+      </header>
 
-      {/* ── 主体：占满剩余高度 ── */}
-      <div className="flex-1 min-h-0 flex">
-        
-        {/* ── 左：卡牌图片 ── */}
-        <div className="hidden lg:flex w-[40%] shrink-0 bg-[#0a0a0f] items-center justify-center p-6 xl:p-10">
-          <div className="relative w-full max-w-[360px]" style={{ height: "calc(100vh - 5rem)", maxHeight: "680px" }}>
-            <div className="w-full h-full rounded-2xl overflow-hidden" style={{ aspectRatio: "auto" }}>
+      <main className="container grid min-h-[calc(100vh-6rem)] gap-6 pb-8 pt-8 xl:grid-cols-[0.95fr_1.05fr] xl:items-stretch">
+        <section className="relative overflow-hidden rounded-[2.2rem] border border-black/8 bg-white/78 p-5 shadow-[0_30px_100px_-48px_rgba(24,24,27,0.34)] backdrop-blur-xl sm:p-7 lg:p-8">
+          <div className="mb-5 flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.34em] text-black/34">
+            <span className="h-px w-10 bg-black/12" />
+            Private Viewing Room
+          </div>
+          <div className="mx-auto flex h-full min-h-[24rem] items-center justify-center rounded-[1.8rem] bg-[radial-gradient(circle_at_top,rgba(214,195,155,0.24),transparent_50%),linear-gradient(180deg,#faf7f2,#f1ece4)] p-4 sm:p-8">
+            <div className="w-full max-w-[26rem] overflow-hidden rounded-[1.4rem] border border-black/8 bg-white shadow-[0_26px_90px_-48px_rgba(24,24,27,0.35)]">
               <CardMagnifier
                 src={card.frontImageUrl}
                 highResSrc={card.frontImageUrl}
                 alt={card.name}
-                magnification={2.5}
+                magnification={2.4}
                 lensSize={180}
               />
             </div>
-            <p className="absolute -bottom-5 left-0 right-0 text-[9px] text-white/12 text-center">
-              悬停放大查看细节
-            </p>
           </div>
-        </div>
+          <p className="mt-4 text-center text-xs text-black/36">桌面端支持悬停放大查看卡面细节</p>
+        </section>
 
-        {/* ── 右：信息面板 — 严格一屏，flex分配 ── */}
-        <div className="flex-1 flex items-center justify-center px-5 sm:px-8 xl:px-12">
-          <div className="w-full max-w-[540px] h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-center py-4 gap-[clamp(0.5rem,1.2vh,1rem)]">
-
-            {/* 移动端图片 */}
-            <div className="lg:hidden aspect-[3/4] max-h-[200px] rounded-xl overflow-hidden bg-[#0a0a0f] mx-auto w-full max-w-[160px] shrink-0">
-              <img src={card.frontImageUrl} alt={card.name} className="w-full h-full object-contain" />
-            </div>
-
-            {/* 标题区 */}
-            <div className="shrink-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getGradeBg(card.grade)} ${getGradeColor(card.grade)}`}>
+        <section className="rounded-[2.2rem] border border-black/8 bg-white/82 p-6 shadow-[0_34px_100px_-46px_rgba(24,24,27,0.34)] backdrop-blur-xl sm:p-8">
+          <div className="flex h-full flex-col gap-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`rounded-full border px-3 py-1.5 text-[0.72rem] font-semibold ${gradeBadgeClass(card.grade)}`}>
                   PSA {gradeNum} {gradeLabel}
                 </span>
-                <span className="text-[11px] text-white/25">{card.year} · {card.language}</span>
+                <span className="text-sm text-black/38">{card.year} · {card.language}</span>
               </div>
-              <h1 className="text-[clamp(1.1rem,2.2vw,1.5rem)] font-bold text-white/95 leading-tight tracking-tight">
+              <h1 className="mt-4 font-serif text-4xl leading-[0.95] text-neutral-950 sm:text-5xl">
                 {shortName}
               </h1>
-              <p className="text-[11px] text-white/25 mt-0.5">
+              <p className="mt-3 text-sm leading-7 text-black/46">
                 {card.setName} · Card #{card.cardNumber}
               </p>
             </div>
 
-            {/* FMV */}
-            <div className="shrink-0 rounded-xl bg-[#12121a] border border-white/[0.06] px-4 py-3">
-              <span className="text-[9px] text-white/20 uppercase tracking-[0.1em] font-medium block mb-0.5">
-                Fair Market Value
-              </span>
-              <span className="text-[clamp(1.4rem,3vh,2rem)] font-bold text-amber-400 font-mono tracking-tight leading-none block">
-                ${card.fmvPriceUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-              <p className="text-[9px] text-white/15 mt-1">Based on Renaiss Protocol real-time pricing</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-black/8 bg-[linear-gradient(180deg,#fffdfa,#f3eee5)] p-5">
+                <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Fair Market Value</div>
+                <div className="mt-3 text-3xl font-semibold text-neutral-950 sm:text-[2.2rem]">
+                  {formatMoney(card.fmvPriceUSD)}
+                </div>
+                <p className="mt-2 text-xs text-black/38">基于 Renaiss 实时市场定价</p>
+              </div>
+              <div className="rounded-[1.5rem] border border-black/8 bg-[#f6f2eb] p-5">
+                <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Ask Price</div>
+                <div className="mt-3 text-3xl font-semibold text-neutral-950 sm:text-[2.2rem]">
+                  {formatMoney(card.askPriceUSDT)}
+                </div>
+                <p className="mt-2 text-xs text-black/38">当前市场挂牌价格</p>
+              </div>
             </div>
 
-            {/* Ask Price */}
-            <div className="shrink-0 rounded-xl bg-[#12121a] border border-white/[0.06] px-4 py-3">
-              <span className="text-[9px] text-white/20 uppercase tracking-[0.1em] font-medium block mb-0.5">
-                Ask Price
-              </span>
-              <span className="text-[clamp(1.2rem,2.5vh,1.7rem)] font-bold text-white/90 font-mono tracking-tight leading-none block">
-                ${card.askPriceUSDT.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-
-            {/* Card Attributes — 2x4 紧凑网格 */}
-            <div className="shrink-0">
-              <span className="text-[9px] text-white/20 uppercase tracking-[0.1em] font-medium block mb-1.5">
-                Card Attributes
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { label: "PSA Serial", value: card.serial },
-                  { label: "Grade", value: `${gradeNum} ${gradeLabel}` },
-                  { label: "Year", value: String(card.year) },
-                  { label: "Language", value: card.language },
-                  { label: "Set", value: card.setName },
-                  { label: "Card Number", value: `#${card.cardNumber}` },
-                  { label: "Grading Company", value: card.gradingCompany },
-                  { label: "Vault Location", value: "Platform" },
-                ].map((attr) => (
-                  <div key={attr.label} className="rounded-lg bg-[#12121a] border border-white/[0.05] px-3 py-[clamp(0.35rem,0.8vh,0.6rem)]">
-                    <span className="text-[8px] text-white/20 uppercase tracking-wider block">
-                      {attr.label}
-                    </span>
-                    <span className="text-[12px] text-white/75 font-medium block truncate leading-snug" title={attr.value}>
-                      {attr.value}
-                    </span>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {attrList.map((attr) => (
+                <div key={attr.label} className="rounded-[1.2rem] border border-black/8 bg-white px-4 py-3.5">
+                  <div className="text-[0.58rem] uppercase tracking-[0.22em] text-black/28">{attr.label}</div>
+                  <div className="mt-1.5 truncate text-sm font-medium text-black/76" title={attr.value}>
+                    {attr.value}
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-[1.4rem] border border-black/8 bg-[#f6f2eb] px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[0.58rem] uppercase tracking-[0.22em] text-black/28">Owner</div>
+                  <div className="mt-1.5 truncate font-mono text-sm text-black/68">{ownerText}</div>
+                </div>
+                <CopyBtn text={ownerText} />
               </div>
             </div>
 
-            {/* Owner */}
-            <div className="shrink-0 rounded-lg bg-[#12121a] border border-white/[0.05] px-3 py-2 flex items-center justify-between">
-              <div className="min-w-0">
-                <span className="text-[8px] text-white/20 uppercase tracking-wider block">Owner</span>
-                <span className="text-[11px] text-white/40 font-mono truncate block">
-                  {card.ownerUsername || card.ownerAddress.substring(0, 20) + "..."}
-                </span>
-              </div>
-              <CopyBtn text={card.ownerUsername || card.ownerAddress} />
-            </div>
-
-            {/* 按钮 */}
-            <div className="shrink-0 grid grid-cols-2 gap-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               <a
                 href={psaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-500/12 border border-amber-500/20 text-[11px] text-amber-400 font-semibold hover:bg-amber-500/18 transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-medium text-black/72 transition hover:bg-black hover:text-white"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                查看 PSA 官网真实数据
+                查看 PSA 官方记录
+                <ExternalLink className="h-4 w-4" />
               </a>
               <a
                 href={renaissUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/40 font-medium hover:bg-white/[0.07] hover:text-white/60 transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-neutral-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-black"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                在 Renaiss 官网查看
+                前往 Renaiss 页面
+                <ExternalLink className="h-4 w-4" />
               </a>
             </div>
 
-            <p className="shrink-0 text-[8px] text-white/8 text-center">
-              数据来源 Renaiss Protocol (BNB Chain) · PSA 官方认证 · 实时同步
+            <p className="mt-auto text-center text-xs leading-6 text-black/34">
+              数据来源 Renaiss Protocol 与 PSA 认证信息。界面风格已统一到当前改版语言，但保留原有详情字段、外链与可购买路径。
             </p>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

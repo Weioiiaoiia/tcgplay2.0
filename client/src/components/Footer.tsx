@@ -1,3 +1,8 @@
+/**
+ * Design note — Fog-white precision exhibition system.
+ * Compliance content should feel explicit and trustworthy, not hidden or punitive:
+ * soft ivory panels, measured hierarchy, and readable legal copy.
+ */
 import { ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -53,53 +58,52 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="border-t border-white/[0.05]">
-        <div className="container pb-12">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-center gap-2.5 mb-5">
-              <ShieldCheck className="w-4 h-4 text-white/20" />
-              <p className="text-[11px] tracking-[0.15em] uppercase text-white/20">
+      <footer className="border-t border-black/8 bg-[linear-gradient(180deg,rgba(248,246,241,0.96),rgba(241,236,226,0.92))]">
+        <div className="container pb-10 pt-12 sm:pb-12">
+          <div className="mx-auto max-w-4xl rounded-[2rem] border border-black/8 bg-white/74 p-6 shadow-[0_30px_90px_-48px_rgba(24,24,27,0.3)] backdrop-blur-xl sm:p-8">
+            <div className="mb-5 flex items-center justify-center gap-2.5">
+              <ShieldCheck className="h-4 w-4 text-black/42" />
+              <p className="text-[0.68rem] uppercase tracking-[0.28em] text-black/36">
                 {t("footer.disclaimerTitle")}
               </p>
             </div>
-            <div className="p-6 rounded-2xl bg-white/[0.015] border border-white/[0.04]">
-              <p className="text-[12px] text-white/25 leading-[1.9] text-center">
-                {t("footer.disclaimerBody")}
-              </p>
-            </div>
-            <p className="text-[10px] text-white/12 text-center mt-3">
+            <p className="text-center text-[0.92rem] leading-8 text-black/52">
+              {t("footer.disclaimerBody")}
+            </p>
+            <p className="mt-4 text-center text-xs leading-6 text-black/34">
               {t("footer.disclaimerNote")}
             </p>
           </div>
         </div>
 
-        <div className="border-t border-white/[0.04]">
-          <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-white/15 to-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                <span className="text-[8px] font-bold text-white/70">T</span>
+        <div className="border-t border-black/8">
+          <div className="container flex flex-col items-center justify-between gap-4 py-5 sm:flex-row">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-black/8 bg-white text-[0.7rem] font-semibold text-neutral-950">
+                T
               </div>
-              <p className="text-[12px] text-white/20">{t("footer.copyright")}</p>
+              <p className="text-sm text-black/46">{t("footer.copyright")}</p>
             </div>
-            <div className="flex items-center gap-6 flex-wrap justify-center">
+
+            <div className="flex flex-wrap items-center justify-center gap-5">
               <button
                 type="button"
                 onClick={() => setActiveDialog("privacy")}
-                className="text-[12px] text-white/15 hover:text-white/30 transition-colors cursor-pointer"
+                className="text-sm text-black/42 transition hover:text-black"
               >
                 {t("footer.privacy")}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveDialog("terms")}
-                className="text-[12px] text-white/15 hover:text-white/30 transition-colors cursor-pointer"
+                className="text-sm text-black/42 transition hover:text-black"
               >
                 {t("footer.terms")}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveDialog("ip")}
-                className="text-[12px] text-white/15 hover:text-white/30 transition-colors cursor-pointer"
+                className="text-sm text-black/42 transition hover:text-black"
               >
                 {t("footer.ip")}
               </button>
@@ -107,7 +111,7 @@ export default function Footer() {
                 href="https://x.com/chen1904o"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[12px] text-white/15 hover:text-white/30 transition-colors cursor-pointer"
+                className="text-sm text-black/42 transition hover:text-black"
               >
                 {t("footer.contact")}
               </a>
@@ -118,17 +122,17 @@ export default function Footer() {
 
       <Dialog open={activeDialog !== null} onOpenChange={(open) => !open && setActiveDialog(null)}>
         <DialogContent
-          className="max-w-2xl border-white/[0.08] bg-[#050505] text-white shadow-2xl shadow-black/50"
+          className="max-w-3xl rounded-[2rem] border border-black/8 bg-[#f7f4ee] text-neutral-950 shadow-[0_40px_120px_-44px_rgba(24,24,27,0.42)]"
           showCloseButton
         >
           <DialogHeader>
-            <DialogTitle className="text-[18px] font-medium tracking-[0.04em] text-white/90">
+            <DialogTitle className="text-xl font-semibold tracking-[0.01em] text-neutral-950 sm:text-2xl">
               {dialogContent?.title}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-2">
             {dialogContent?.paragraphs.map((paragraph, index) => (
-              <p key={index} className="text-[13px] leading-7 text-white/65">
+              <p key={index} className="text-sm leading-8 text-black/58">
                 {paragraph}
               </p>
             ))}

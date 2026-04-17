@@ -34,6 +34,8 @@ interface CardDataContextType {
 const CardDataContext = createContext<CardDataContextType | null>(null);
 
 const REFRESH_INTERVAL = 30_000;
+const CARD_CACHE_KEY = "tcgplay2_cards_cache_v1";
+const CARD_CACHE_TIME_KEY = "tcgplay2_cards_cache_time_v1";
 
 export function CardDataProvider({ children }: { children: ReactNode }) {
   const [allCards, setAllCards] = useState<RenaissCard[]>([]);
@@ -44,6 +46,27 @@ export function CardDataProvider({ children }: { children: ReactNode }) {
   const isMountedRef = useRef(true);
   const fetchingRef = useRef(false);
 
+  const hydrateFromCache = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const rawCards = window.localStorage.getItem(CARD_CACHE_KEY);
+      const rawTime = window.localStorage.getItem(CARD_CACHE_TIME_KEY);
+      if (!rawCards) return false;
+
+      const parsedCards = JSON.parse(rawCards) as RenaissCard[];
+      const parsedTime = rawTime ? Number(rawTime) : Date.now();
+      if (!Array.isArray(parsedCards) || parsedCards.length === 0) return false;
+
+      setAllCards(parsedCards);
+      setLastUpdated(new Date(parsedTime));
+      setInitialLoaded(true);
+      setLoading(false);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const loadData = useCallback(
     async (showLoading = false) => {
       if (fetchingRef.current) return;
@@ -52,11 +75,14 @@ export function CardDataProvider({ children }: { children: ReactNode }) {
         if (showLoading) setLoading(true);
         const data = await fetchRenaissCards();
         if (!isMountedRef.current) return;
-        // 后端已经只返回 listedOnly 卡牌，这里直接使用
         setAllCards(data.cards);
         setLastUpdated(new Date(data.lastUpdated));
         setError(null);
         setInitialLoaded(true);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(CARD_CACHE_KEY, JSON.stringify(data.cards));
+          window.localStorage.setItem(CARD_CACHE_TIME_KEY, String(data.lastUpdated));
+        }
       } catch (err) {
         console.error("Failed to load cards:", err);
         if (isMountedRef.current) {
@@ -73,11 +99,12 @@ export function CardDataProvider({ children }: { children: ReactNode }) {
   // Initial load
   useEffect(() => {
     isMountedRef.current = true;
-    loadData(true);
+    const hydrated = hydrateFromCache();
+    loadData(!hydrated);
     return () => {
       isMountedRef.current = false;
     };
-  }, [loadData]);
+  }, [hydrateFromCache, loadData]);
 
   // Auto-refresh every 30 seconds (silent, no loading state)
   useEffect(() => {
@@ -92,7 +119,6 @@ export function CardDataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       await forceRefresh();
-      await new Promise((r) => setTimeout(r, 2000));
       await loadData(false);
     } catch {
       await loadData(true);

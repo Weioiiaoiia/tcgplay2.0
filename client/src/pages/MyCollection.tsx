@@ -1,82 +1,71 @@
-import { useState } from 'react';
-import { useWallet } from '@/contexts/WalletContext';
-import { Link } from 'wouter';
-import { ArrowLeft, LogOut } from 'lucide-react';
-import WalletConnect from '@/components/collection/WalletConnect';
-import CardGrid from '@/components/collection/CardGrid';
-import CardDetail from '@/components/collection/CardDetail';
-import { type CardData } from '@/lib/renaissApi';
+/**
+ * Design note — Fog-white precision exhibition system.
+ * This page should feel like a premium portfolio viewing room: airy, luminous,
+ * editorial, and functionally clear. Preserve address-input lookup and modal detail.
+ */
+import { useState } from "react";
+import { ArrowLeft, Globe, LogOut } from "lucide-react";
+import { Link } from "wouter";
+import { useWallet } from "@/contexts/WalletContext";
+import WalletConnect from "@/components/collection/WalletConnect";
+import CardGrid from "@/components/collection/CardGrid";
+import CardDetail from "@/components/collection/CardDetail";
+import { type CardData } from "@/lib/renaissApi";
 
 export default function MyCollection() {
   const { connected, loading, address, disconnectWallet } = useWallet();
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
-  // Shorten address for display: 0x1234...abcd
-  const shortAddr = address
-    ? `${address.slice(0, 6)}...${address.slice(-4)}`
-    : '';
+  const shortAddr = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
 
   return (
-    <div className="min-h-screen bg-[oklch(0.07_0.005_260)]">
-      {/* Top navigation bar */}
-      <nav className="fixed top-0 inset-x-0 z-50">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundColor: 'oklch(0.07 0.005 260 / 0.88)',
-            backdropFilter: 'blur(24px) saturate(1.2)',
-          }}
-        />
-        <div className="absolute bottom-0 inset-x-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, oklch(1 0 0 / 0.06), transparent)' }} />
-
-        <div className="relative container flex items-center justify-between h-14">
-          {/* Back to home */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors duration-300"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-[13px] font-medium">返回</span>
-          </Link>
-
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-white/15 to-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-              <span className="text-[11px] font-bold text-white/80">T</span>
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f7f4ee_0%,#efebe2_40%,#f8f6f1_100%)] text-neutral-950">
+      <div className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
+        <nav className="mx-auto flex max-w-[1240px] items-center justify-between rounded-full border border-black/8 bg-white/76 px-4 py-3 shadow-[0_18px_60px_-36px_rgba(24,24,27,0.35)] backdrop-blur-xl sm:px-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link
+              href="/"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/8 bg-[#f6f2eb] text-black/70 transition hover:bg-black hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-black/8 bg-[#f5f1ea] text-sm font-semibold text-neutral-950">
+                T
+              </div>
+              <div>
+                <div className="text-base font-semibold text-neutral-950">TCGPlay</div>
+                <div className="hidden text-[0.62rem] uppercase tracking-[0.26em] text-black/30 sm:block">
+                  Collection View
+                </div>
+              </div>
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-white/90">
-              TCGPlay
-            </span>
           </div>
 
-          {/* Right side: wallet status or Renaiss badge */}
-          {connected && address ? (
-            <div className="flex items-center gap-2">
-              {/* Wallet address pill */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-400/[0.06] border border-emerald-400/[0.1]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[11px] text-emerald-400/70 font-mono font-medium">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {connected && address ? (
+              <>
+                <div className="hidden items-center gap-2 rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-2 text-xs text-black/58 sm:inline-flex">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   {shortAddr}
-                </span>
+                </div>
+                <button
+                  onClick={disconnectWallet}
+                  className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-medium text-black/64 transition hover:bg-black hover:text-white"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  断开
+                </button>
+              </>
+            ) : (
+              <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-2 text-xs text-black/56">
+                <Globe className="h-3.5 w-3.5" />
+                Address Query
               </div>
-              {/* Disconnect button */}
-              <button
-                onClick={disconnectWallet}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-400/[0.06] border border-white/[0.06] hover:border-red-400/[0.15] transition-all duration-300"
-                title="断开钱包"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="text-[11px] font-medium hidden sm:inline">断开</span>
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-400/[0.06] border border-emerald-400/[0.1]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] text-emerald-400/70 font-medium">Renaiss</span>
-            </div>
-          )}
-        </div>
-      </nav>
+            )}
+          </div>
+        </nav>
+      </div>
 
       {!connected && !loading ? (
         <WalletConnect />
