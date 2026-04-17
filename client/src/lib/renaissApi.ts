@@ -50,6 +50,9 @@ interface RawCard {
   category?: string;
   attributes?: Array<{ trait: string; value: string }>;
   listedAt?: string;
+  listDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const TRPC_BASE = "https://www.renaiss.xyz/api/trpc/collectible.list";
@@ -104,7 +107,7 @@ function parseCard(raw: RawCard): RenaissCard {
     ownerUsername: raw.owner?.username || "",
     category: raw.category || "pokemon",
     premiumRate,
-    listedAt: raw.listedAt || "",
+    listedAt: raw.listedAt || raw.listDate || raw.createdAt || raw.updatedAt || "",
   };
 }
 

@@ -80,7 +80,14 @@ export function useRenaissData() {
 
     // Grade
     if (filters.gradeFilter !== "all") {
-      result = result.filter((c) => c.grade.includes(filters.gradeFilter));
+      if (filters.gradeFilter === "≤6") {
+        result = result.filter((c) => {
+          const num = parseFloat(c.grade);
+          return !isNaN(num) && num <= 6;
+        });
+      } else {
+        result = result.filter((c) => c.grade.includes(filters.gradeFilter));
+      }
     }
 
     // Grader company (PSA / BGS / CGC / TAG)

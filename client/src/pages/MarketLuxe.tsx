@@ -43,7 +43,7 @@ const sortOptions: { label: string; value: SortBy }[] = [
   { label: "溢价率", value: "premium" },
 ];
 
-const gradeOptions = ["all", "10", "9", "8", "7"];
+const gradeOptions = ["all", "10", "9", "8", "7", "≤6"];
 const languageOptions = ["all", "Japanese", "English", "Simplified Chinese"];
 const graderOptions = ["all", "PSA", "BGS", "CGC", "TAG"];
 
@@ -83,6 +83,17 @@ function formatCurrency(value: number) {
 function getPremiumPct(ask: number, fmv: number): number | null {
   if (!fmv || fmv <= 0) return null;
   return Math.round(((ask - fmv) / fmv) * 100);
+}
+
+function timeAgo(dateStr: string): string {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "";
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return `${diff}s`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  return `${Math.floor(diff / 86400)}d`;
 }
 
 function SkeletonCard() {
@@ -129,33 +140,55 @@ function MarketGridCard({ card, onOpen, index }: { card: RenaissCard; onOpen: ()
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, delay: Math.min(index * 0.022, 0.55), ease: [0.22, 1, 0.36, 1] }}
       onClick={onOpen}
-      className="group overflow-hidden rounded-[1.2rem] border border-[#e8e0d0] bg-white/88 text-left shadow-[0_10px_32px_rgba(40,32,20,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#d4c18f]/80 hover:shadow-[0_18px_52px_rgba(160,130,60,0.11)]"
+      className="group overflow-hidden rounded-[1.2rem] border border-[#2a2620] bg-[#141210] text-left shadow-[0_10px_32px_rgba(10,8,6,0.28)] transition-all duration-300 hover:-translate-y-1 hover:border-[#4a3f28] hover:shadow-[0_18px_52px_rgba(10,8,6,0.38)]"
     >
-      <div className="relative aspect-[4/5] overflow-hidden border-b border-[#ece5d8] bg-[linear-gradient(180deg,#faf7f2,#f0ebe3)] p-2.5">
+      {/* 顶部标签行：上架时间 + 溢价 + 等级 */}
+      <div className="flex items-center justify-between px-3 pt-2.5 pb-0">
+        <span className="font-mono text-[10px] font-medium text-[#c8b890]"></span>
+        <div className="flex items-center gap-1.5">
+          {premium !== null && (
+            <span className={`rounded border px-1.5 py-0.5 font-mono text-[9px] font-medium tracking-wide ${
+              premium < 0
+                ? "border-[#2d6b52] bg-[#0d2e22] text-[#5cd4a0]"
+                : premium > 0
+                ? "border-[#6b2d2d] bg-[#2e0d0d] text-[#d47a5c]"
+                : "border-white/10 bg-white/5 text-white/30"
+            }`}>
+              {premium > 0 ? "+" : ""}{premium}%
+            </span>
+          )}
+          <span className={`rounded-[0.4rem] border px-1.5 py-0.5 text-[9px] font-semibold ${getGradeBg(card.grade)} ${getGradeColor(card.grade)}`}>
+            {card.grade}
+          </span>
+        </div>
+      </div>
+      {/* 卡牌图片区：深色背景，卡牌铺满展示 */}
+      <div className="relative overflow-hidden">
         <img
-          src={getRenaissImageUrl(card.frontImageUrl, 640)}
+          src={getRenaissImageUrl(card.frontImageUrl, 800)}
           alt={card.name}
           loading="lazy"
-          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+          className="mx-auto block w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
         />
-        <span
-          className={`absolute right-2.5 top-2.5 rounded-full border px-2 py-0.5 text-[9px] font-semibold ${getGradeBg(card.grade)} ${getGradeColor(card.grade)}`}
-        >
-          {card.grade}
-        </span>
-        {premium !== null && <PremiumBadge premium={premium} />}
       </div>
-      <div className="space-y-1.5 p-3">
-        <p className="line-clamp-1 text-[0.86rem] font-semibold tracking-[-0.03em] text-[#1a1612]">
+      {/* 序列号 */}
+      {card.serial && (
+        <p className="px-3 pb-2 text-center font-mono text-[11px] font-medium tracking-[0.18em] text-white/70 select-all">
+          {card.serial}
+        </p>
+      )}
+      {/* 底部信息区：暖象牙色背景 */}
+      <div className="border-t border-[#2a2620] bg-[#faf7f1] px-3 py-2.5">
+        <p className="line-clamp-1 text-[0.84rem] font-semibold tracking-[-0.03em] text-[#1a1612]">
           {card.pokemonName || card.name}
         </p>
-        <p className="line-clamp-1 text-[10px] leading-5 text-[#8a7f70]">
+        <p className="mt-0.5 line-clamp-1 text-[10px] text-[#8a7f70]">
           {card.setName} · #{card.cardNumber}
         </p>
-        <div className="flex items-end justify-between gap-2 pt-0.5">
+        <div className="mt-1.5 flex items-end justify-between gap-2">
           <div>
             <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#a89880]">Ask</span>
-            <strong className="mt-0.5 block font-mono text-[0.88rem] text-[#1a1612]">
+            <strong className="mt-0.5 block font-mono text-[0.86rem] text-[#1a1612]">
               {formatCurrency(card.askPriceUSDT)}
             </strong>
           </div>
