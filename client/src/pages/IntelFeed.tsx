@@ -244,12 +244,16 @@ export default function IntelFeed() {
   const [keyword, setKeyword] = useState("");
   const [cursor, setCursor] = useState<number | undefined>(undefined);
   const [allItems, setAllItems] = useState<any[]>([]);
+  const [cachedItems, setCachedItems] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const fastRecoveryRef = useRef(false);
+
+  const isDefaultQuery = section === "all" && category === "all" && game === "all" && !keyword && !cursor;
 
   const queryInput = useMemo(
     () => ({
-      limit: 50,
+      limit: 24,
       section: section === "all" ? undefined : section,
       category: category === "all" ? undefined : category,
       game: game === "all" ? undefined : game,
@@ -262,6 +266,20 @@ export default function IntelFeed() {
   const { data, isLoading, isFetching, refetch } = trpc.insights.list.useQuery(queryInput, {
     placeholderData: (prev: any) => prev,
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem("intelfeed-fast-cache");
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed?.items)) {
+        setCachedItems(parsed.items);
+      }
+    } catch {
+      // ignore cache read errors
+    }
+  }, []);
 
   useEffect(() => {
     if (data?.items) {
@@ -277,6 +295,31 @@ export default function IntelFeed() {
       setHasMore(!!data.nextCursor);
     }
   }, [data, cursor]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isDefaultQuery || !allItems.length) return;
+    try {
+      window.localStorage.setItem("intelfeed-fast-cache", JSON.stringify({ items: allItems.slice(0, 24), cachedAt: Date.now() }));
+    } catch {
+      // ignore cache write errors
+    }
+  }, [allItems, isDefaultQuery]);
+
+  useEffect(() => {
+    if (!isDefaultQuery) {
+      fastRecoveryRef.current = false;
+      return;
+    }
+    if (allItems.length > 0 || isFetching || fastRecoveryRef.current) return;
+
+    fastRecoveryRef.current = true;
+    const timer = window.setTimeout(() => {
+      void refetch();
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, [allItems.length, isDefaultQuery, isFetching, refetch]);
 
   const resetAndFetch = useCallback(() => {
     setAllItems([]);
@@ -314,8 +357,11 @@ export default function IntelFeed() {
     return () => observer.disconnect();
   }, [hasMore, isFetching, loadMore]);
 
-  const isDemoMode = !isLoading && allItems.length === 0;
-  const displayItems = (isDemoMode ? DEMO_ITEMS : allItems).filter((item: any) => item.section === "tcg" || item.section === "web3");
+  const usingCachedSnapshot = isDefaultQuery && allItems.length === 0 && cachedItems.length > 0;
+  const showDemoFallback = isDefaultQuery && allItems.length === 0 && cachedItems.length === 0;
+  const isDemoMode = showDemoFallback;
+  const visibleSeedItems = allItems.length > 0 ? allItems : usingCachedSnapshot ? cachedItems : DEMO_ITEMS;
+  const displayItems = visibleSeedItems.filter((item: any) => item.section === "tcg" || item.section === "web3");
   const featured = displayItems[0];
   const quickItems = displayItems.slice(1, 4);
   const gridItems = displayItems.slice(4, 10);
@@ -353,10 +399,10 @@ export default function IntelFeed() {
                   {item.label}
                 </span>
               ))}
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium text-emerald-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                {isDemoMode ? "演示布局" : "真实抓取"}
-              </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium text-emerald-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {usingCachedSnapshot ? "缓存秒开" : isDemoMode ? "演示布局" : "真实抓取"}
+                </span>
             </div>
           </motion.section>
 
@@ -366,12 +412,12 @@ export default function IntelFeed() {
             transition={{ duration: 0.62, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
             className="grid gap-4 sm:grid-cols-2"
           >
-              {[
-                { label: "已加载情报", value: isLoading ? "…" : `${displayItems.length}${hasMore ? "+" : ""}`, desc: "当前可浏览条目" },
-                { label: "覆盖来源", value: isLoading ? "…" : `${sourceCount}`, desc: "去重后的情报源数量" },
-                { label: "高优先级", value: isLoading ? "…" : `${highPriorityCount}`, desc: "爆点提醒候选数量" },
-                { label: "当前状态", value: isFetching ? "更新中" : isDemoMode ? "演示中" : latestTime, desc: isFetching ? "数据接口运行状态" : "最近一条抓取时间" },
-              ].map((item) => (
+                {[
+                  { label: "已加载情报", value: displayItems.length ? `${displayItems.length}${hasMore && allItems.length > 0 ? "+" : ""}` : "…", desc: "当前可浏览条目" },
+                  { label: "覆盖来源", value: displayItems.length ? `${sourceCount}` : "…", desc: "去重后的情报源数量" },
+                  { label: "高优先级", value: displayItems.length ? `${highPriorityCount}` : "…", desc: "爆点提醒候选数量" },
+                  { label: "当前状态", value: isFetching ? "后台刷新" : usingCachedSnapshot ? "秒开缓存" : isDemoMode ? "演示中" : latestTime, desc: isFetching ? "数据已先展示，后台继续更新" : usingCachedSnapshot ? "先展示上次快照，再静默更新" : "最近一条抓取时间" },
+                ].map((item) => (
               <div key={item.label} className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
                 <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">{item.label}</div>
                 <div className="mt-3 text-3xl font-semibold text-neutral-950">{item.value}</div>

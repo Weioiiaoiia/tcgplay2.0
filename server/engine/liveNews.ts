@@ -158,6 +158,11 @@ const TABLETOP_EXCLUDE_KEYWORDS = [
   "tabletop rpg",
 ];
 
+const LIVE_CACHE_TTL_MS = 90_000;
+
+let liveFeedCache: { items: LiveInsightItem[]; fetchedAt: number } | null = null;
+let liveFeedRefreshPromise: Promise<LiveInsightItem[]> | null = null;
+
 const PUBLIC_FEEDS: FeedSource[] = [
   {
     name: "CoinDesk",
@@ -579,7 +584,7 @@ async function fetchFeed(source: FeedSource): Promise<LiveInsightItem[]> {
   const safeFeedUrl = ensureSafeFeedUrl(source.url);
   const response = await fetch(safeFeedUrl, {
     headers: { "User-Agent": "IntelFeed/1.0 Live News" },
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(2500),
   });
   if (!response.ok) {
     throw new Error(`${source.name}: HTTP ${response.status}`);
@@ -598,6 +603,48 @@ async function fetchFeed(source: FeedSource): Promise<LiveInsightItem[]> {
   return items.slice(0, source.maxItems ?? 12).map((item, index) => toLiveInsight(source, item, fetchedAt, index));
 }
 
+async function fetchAllFeeds(): Promise<LiveInsightItem[]> {
+  const results = await Promise.allSettled(PUBLIC_FEEDS.map((feed) => fetchFeed(feed)));
+  const merged = results
+    .filter((result): result is PromiseFulfilledResult<LiveInsightItem[]> => result.status === "fulfilled")
+    .flatMap((result) => result.value);
+
+  return merged
+    .filter((item, index, array) => {
+      return array.findIndex((other) => other.sourceUrl === item.sourceUrl || other.title === item.title) === index;
+    })
+    .sort((a, b) => (b.publishedAt?.getTime() ?? b.createdAt.getTime()) - (a.publishedAt?.getTime() ?? a.createdAt.getTime()));
+}
+
+async function refreshLiveFeedCache(): Promise<LiveInsightItem[]> {
+  if (!liveFeedRefreshPromise) {
+    liveFeedRefreshPromise = fetchAllFeeds()
+      .then((items) => {
+        liveFeedCache = { items, fetchedAt: Date.now() };
+        return items;
+      })
+      .finally(() => {
+        liveFeedRefreshPromise = null;
+      });
+  }
+
+  return liveFeedRefreshPromise;
+}
+
+async function getCachedLiveItems(): Promise<LiveInsightItem[]> {
+  const now = Date.now();
+  if (liveFeedCache && now - liveFeedCache.fetchedAt <= LIVE_CACHE_TTL_MS) {
+    return liveFeedCache.items;
+  }
+
+  if (liveFeedCache?.items?.length) {
+    void refreshLiveFeedCache();
+    return liveFeedCache.items;
+  }
+
+  return refreshLiveFeedCache();
+}
+
 export async function getLiveFallbackInsights(input: {
   limit: number;
   section?: InsightSection;
@@ -606,24 +653,9 @@ export async function getLiveFallbackInsights(input: {
   keyword?: string;
   source?: string;
 }): Promise<LiveInsightItem[]> {
-  const eligibleFeeds = PUBLIC_FEEDS.filter((feed) => {
-    if (input.section && feed.section !== input.section) return false;
-    if (input.game && feed.game !== input.game && feed.game !== "general") return false;
-    if (input.source && feed.name !== input.source) return false;
-    return true;
-  });
-
-  const results = await Promise.allSettled(eligibleFeeds.map((feed) => fetchFeed(feed)));
-  const merged = results
-    .filter((result): result is PromiseFulfilledResult<LiveInsightItem[]> => result.status === "fulfilled")
-    .flatMap((result) => result.value);
-
-  const deduped = merged.filter((item, index, array) => {
-    return array.findIndex((other) => other.sourceUrl === item.sourceUrl || other.title === item.title) === index;
-  });
-
+  const cachedItems = await getCachedLiveItems();
   const keyword = input.keyword?.trim().toLowerCase();
-  const filtered = deduped.filter((item) => {
+  const filtered = cachedItems.filter((item) => {
     if (input.section && item.section !== input.section) return false;
     if (input.category && item.category !== input.category) return false;
     if (input.game && item.game !== input.game) return false;
@@ -635,10 +667,10 @@ export async function getLiveFallbackInsights(input: {
     return true;
   });
 
-  return filtered
-    .sort((a, b) => (b.publishedAt?.getTime() ?? b.createdAt.getTime()) - (a.publishedAt?.getTime() ?? a.createdAt.getTime()))
-    .slice(0, input.limit);
+  return filtered.slice(0, input.limit);
 }
+
+void refreshLiveFeedCache();
 
 export function getLiveFallbackSourceCount(): number {
   return PUBLIC_FEEDS.length;
