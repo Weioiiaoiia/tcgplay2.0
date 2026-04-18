@@ -4,9 +4,9 @@
  */
 
 export const DISCLAIMER =
-  "This is an AI-generated synthesis for informational purposes only. " +
-  "TCGPlay / IntelFeed is not affiliated with any original content creator or rights holder. " +
-  "All trademarks belong to their respective owners. No copyrighted images are stored or distributed.";
+  "本页仅提供非官方的文字索引与摘要，供信息参考使用；实际内容请以原始来源页面为准。" +
+  " TCGPlay / IntelFeed 与相关内容来源或权利方不存在官方隶属、授权代运营或背书关系。" +
+  " All trademarks belong to their respective owners. No copyrighted images, full-text reproductions, or official assets are stored or distributed.";
 
 const BLOCKED_PATTERNS = [
   /official\s+card\s+image/i,
@@ -16,6 +16,13 @@ const BLOCKED_PATTERNS = [
   /rulebook\s+(text|excerpt|page)/i,
   /scan\s+of\s+(the\s+)?card/i,
   /full\s+art(work)?\s+reprint/i,
+  /full\s+text\s+(translation|repost|reproduction)/i,
+  /official\s+logo/i,
+  /完整译文/g,
+  /全文转载/g,
+  /原文全文/g,
+  /官方海报/g,
+  /官方卡图/g,
 ];
 
 function sanitize(text: string): string {

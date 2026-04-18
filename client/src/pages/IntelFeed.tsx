@@ -33,7 +33,7 @@ const sections: { id: Section; label: string }[] = [
 
 const categories: { id: Category; label: string }[] = [
   { id: "all", label: "全部来源" },
-  { id: "official", label: "官方" },
+  { id: "official", label: "原始站点" },
   { id: "community", label: "社区" },
   { id: "tournament", label: "赛事" },
   { id: "cross_lang", label: "跨语种" },
@@ -158,11 +158,19 @@ function formatSectionLabel(section?: string) {
 }
 
 function formatCategoryLabel(category?: string) {
-  if (category === "official") return "官方";
+  if (category === "official") return "原始站点";
   if (category === "community") return "社区";
   if (category === "tournament") return "赛事";
   if (category === "cross_lang") return "跨语种";
   return "全部来源";
+}
+
+function formatSourceName(source?: string) {
+  return (source || "未知来源")
+    .replace(/\bofficial\b/gi, "Source")
+    .replace(/官方/g, "来源")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function formatGameLabel(game?: string) {
@@ -394,6 +402,10 @@ export default function IntelFeed() {
             </div>
           </div>
 
+          <div className="mt-5 rounded-[1.3rem] border border-amber-200/70 bg-[rgba(255,248,235,0.9)] px-4 py-3 text-sm leading-7 text-black/58">
+            本页为<strong className="font-semibold text-neutral-950">非官方纯文字情报聚合</strong>，仅展示标题、短摘要与原文跳转，不提供卡图、Logo、整篇转载或授权替代服务。
+          </div>
+
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {sections.map((item) => (
               <button
@@ -502,8 +514,8 @@ export default function IntelFeed() {
               )}
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.3rem] border border-black/8 bg-[#fbf8f2] px-4 py-3">
-                  <div className="text-[0.58rem] uppercase tracking-[0.22em] text-black/28">来源</div>
-                  <div className="mt-2 text-sm font-semibold text-neutral-950">{featured.source}</div>
+                  <div className="text-[0.58rem] uppercase tracking-[0.22em] text-black/28">原文来源</div>
+                  <div className="mt-2 text-sm font-semibold text-neutral-950">{formatSourceName(featured.source)}</div>
                 </div>
                 <div className="rounded-[1.3rem] border border-black/8 bg-[#fbf8f2] px-4 py-3">
                   <div className="text-[0.58rem] uppercase tracking-[0.22em] text-black/28">发布时间</div>
@@ -516,7 +528,7 @@ export default function IntelFeed() {
               </div>
               <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-black/68">
                 <ExternalLink className="h-4 w-4" />
-                打开原始链接
+跳转原文链接
               </div>
             </motion.a>
 
@@ -559,7 +571,7 @@ export default function IntelFeed() {
                     </div>
                   )}
                   <div className="mt-5 flex items-center justify-between text-xs text-black/38">
-                    <span className="font-medium text-black/58">{item.source}</span>
+                    <span className="font-medium text-black/58">{formatSourceName(item.source)}</span>
                     <span>{formatCategoryLabel(item.category)}</span>
                   </div>
                 </motion.a>
@@ -622,7 +634,7 @@ export default function IntelFeed() {
                   )}
                   <div className="mt-5 border-t border-black/6 pt-4 text-xs text-black/38">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-black/58">{item.source}</span>
+                      <span className="font-medium text-black/58">{formatSourceName(item.source)}</span>
                       <span>{timeAgo(item.createdAt)}</span>
                     </div>
                   </div>
@@ -638,7 +650,7 @@ export default function IntelFeed() {
               <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">完整情报流</div>
               <h2 className="mt-2 text-2xl font-semibold text-neutral-950">持续更新列表</h2>
             </div>
-            <div className="text-sm text-black/42">安全链接已过滤，仅展示可用来源</div>
+            <div className="text-sm text-black/42">仅做文字索引与外链跳转，不提供全文转载</div>
           </div>
 
           {isLoading && !displayItems.length ? (
@@ -691,7 +703,7 @@ export default function IntelFeed() {
                       </div>
                     )}
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-black/35">
-                      <span className="font-medium text-black/58">{item.source}</span>
+                      <span className="font-medium text-black/58">{formatSourceName(item.source)}</span>
                       <span>·</span>
                       <span>{formatCategoryLabel(item.category)}</span>
                       <span>·</span>
