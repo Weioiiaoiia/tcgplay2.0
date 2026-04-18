@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1776460289170,
+      "tag": "0000_zippy_marvel_apes",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1776460534208,
+      "tag": "0001_eager_valeria_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1776462084195,
+      "tag": "0002_busy_enchantress",
+      "breakpoints": true
+    }
+  ]
+}

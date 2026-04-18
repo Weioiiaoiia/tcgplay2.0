@@ -47,7 +47,7 @@ const MARKET_PLATFORMS = [
 const NAV_ITEMS = [
   { label: "市场监控", href: "/market", icon: "📊", desc: "实时在售卡牌监控", live: true },
   { label: "我的藏品", href: "/collection", icon: "🗂", desc: "链上藏品查询与管理", live: true },
-  { label: "TCG 洞察引擎", href: "#", icon: "🔍", desc: "深度数据分析与趋势", live: false },
+  { label: "TCG 洞察引擎", href: "/intel", icon: "🔍", desc: "深度数据分析与趋势", live: true },
   { label: "卡牌图集", href: "#", icon: "📖", desc: "全系列卡牌图鉴数据库", live: false },
 ];
 
@@ -270,7 +270,7 @@ export default function Home() {
           <nav className="hidden items-center gap-1 text-sm md:flex">
             <Link href="/market" className="rounded-full px-3.5 py-2 font-medium text-black/60 transition hover:bg-black/6 hover:text-black">市场监控</Link>
             <Link href="/collection" className="rounded-full px-3.5 py-2 font-medium text-black/60 transition hover:bg-black/6 hover:text-black">我的藏品</Link>
-            <span className="rounded-full px-3.5 py-2 font-medium text-black/28 cursor-not-allowed">TCG 洞察引擎 <span className="ml-1 rounded-full bg-[#f0ebe0] px-1.5 py-0.5 font-mono text-[8px] text-[#a89880]">Soon</span></span>
+            <Link href="/intel" className="rounded-full px-3.5 py-2 font-medium text-black/60 transition hover:bg-black/6 hover:text-black">TCG 洞察引擎</Link>
             <span className="rounded-full px-3.5 py-2 font-medium text-black/28 cursor-not-allowed">卡牌图集 <span className="ml-1 rounded-full bg-[#f0ebe0] px-1.5 py-0.5 font-mono text-[8px] text-[#a89880]">Soon</span></span>
             <Link href="/features" className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white/80 px-3.5 py-2 font-medium text-black/70 shadow-sm transition hover:bg-neutral-950 hover:text-white hover:border-neutral-950">功能</Link>
           </nav>

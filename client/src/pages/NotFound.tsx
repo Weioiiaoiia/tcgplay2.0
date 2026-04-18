@@ -1,34 +1,52 @@
-import { Home } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, Home } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
-  const { t } = useTranslation();
+
+  const handleGoHome = () => {
+    setLocation("/");
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="container flex min-h-screen items-center justify-center py-16">
-        <div className="w-full max-w-xl rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 text-center shadow-[0_30px_120px_-40px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03]">
-            <span className="text-[18px] font-semibold text-white/70">404</span>
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardContent className="pt-8 pb-8 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-red-100 rounded-full animate-pulse" />
+              <AlertCircle className="relative h-16 w-16 text-red-500" />
+            </div>
           </div>
 
-          <p className="mb-3 text-[12px] uppercase tracking-[0.22em] text-white/20">TCGPlay</p>
-          <h1 className="mb-3 text-[clamp(1.8rem,4vw,2.6rem)] font-bold tracking-tight text-white">
-            {t("notFound.title")}
-          </h1>
-          <p className="mx-auto mb-8 max-w-md text-[15px] leading-[1.8] text-white/35">{t("notFound.description")}</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
 
-          <button
-            onClick={() => setLocation("/")}
-            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white px-5 py-3 text-[13px] font-medium text-[oklch(0.08_0.005_260)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_16px_40px_-18px_rgba(255,255,255,0.6)]"
+          <h2 className="text-xl font-semibold text-slate-700 mb-4">
+            Page Not Found
+          </h2>
+
+          <p className="text-slate-600 mb-8 leading-relaxed">
+            Sorry, the page you are looking for doesn't exist.
+            <br />
+            It may have been moved or deleted.
+          </p>
+
+          <div
+            id="not-found-button-group"
+            className="flex flex-col sm:flex-row gap-3 justify-center"
           >
-            <Home className="h-4 w-4" />
-            {t("notFound.action")}
-          </button>
-        </div>
-      </div>
+            <Button
+              onClick={handleGoHome}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Go Home
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

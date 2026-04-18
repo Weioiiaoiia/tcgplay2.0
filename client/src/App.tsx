@@ -7,6 +7,12 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { CardDataProvider } from "./contexts/CardDataContext";
 import Home from "./pages/Home";
+import IntelFeed from "./pages/IntelFeed";
+import Alerts from "./pages/Alerts";
+import MetaHeatmap from "./pages/MetaHeatmap";
+import ROIPredictions from "./pages/ROIPredictions";
+import Web3Board from "./pages/Web3Board";
+import EngineStatus from "./pages/EngineStatus";
 import CardDetail from "./pages/CardDetail";
 import MyCollection from "./pages/MyCollection";
 import MarketLuxe from "./pages/MarketLuxe";
@@ -18,6 +24,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/intel" component={IntelFeed} />
+      <Route path="/intel/alerts" component={Alerts} />
+      <Route path="/intel/meta" component={MetaHeatmap} />
+      <Route path="/intel/roi" component={ROIPredictions} />
+      <Route path="/intel/web3" component={Web3Board} />
+      <Route path="/intel/engine" component={EngineStatus} />
       <Route path="/card/:tokenId" component={CardDetail} />
       <Route path="/market" component={MarketLuxe} />
       <Route path="/collection" component={MyCollection} />
@@ -31,11 +43,6 @@ function Router() {
   );
 }
 
-/**
- * Design reminder for the app shell:
- * keep the whole product inside the fog-white precision-exhibition system,
- * using light as the default canvas and letting routes share the same calm materials.
- */
 function App() {
   return (
     <ErrorBoundary>
