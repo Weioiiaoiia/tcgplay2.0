@@ -5,6 +5,7 @@
   "installCommand": "pnpm install --no-frozen-lockfile",
   "framework": null,
   "rewrites": [
+    { "source": "/api/collector/:path*", "destination": "/api/collector/listings" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
