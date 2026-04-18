@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { CardDataProvider } from "./contexts/CardDataContext";
+import { CollectorDataProvider } from "./contexts/CollectorDataContext";
 import Home from "./pages/Home";
 import IntelFeed from "./pages/IntelFeed";
 import Alerts from "./pages/Alerts";
@@ -49,10 +50,12 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <WalletProvider>
           <CardDataProvider>
+            <CollectorDataProvider>
             <TooltipProvider>
               <Toaster />
               <Router />
             </TooltipProvider>
+            </CollectorDataProvider>
           </CardDataProvider>
         </WalletProvider>
       </ThemeProvider>

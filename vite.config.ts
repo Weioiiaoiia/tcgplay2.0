@@ -150,7 +150,90 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+function vitePluginStorageProxy(): Plugin {
+  return {
+    name: "manus-storage-proxy",
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use("/manus-storage", async (req, res) => {
+        const key = req.url?.replace(/^\//, "");
+        if (!key) {
+          res.writeHead(400, { "Content-Type": "text/plain" });
+          res.end("Missing storage key");
+          return;
+        }
+
+        const forgeBaseUrl = (process.env.BUILT_IN_FORGE_API_URL || "").replace(/\/+$/, "");
+        const forgeKey = process.env.BUILT_IN_FORGE_API_KEY;
+
+        if (!forgeBaseUrl || !forgeKey) {
+          res.writeHead(500, { "Content-Type": "text/plain" });
+          res.end("Storage proxy not configured");
+          return;
+        }
+
+        try {
+          const forgeUrl = new URL("v1/storage/presign/get", forgeBaseUrl + "/");
+          forgeUrl.searchParams.set("path", key);
+
+          const forgeResp = await fetch(forgeUrl, {
+            headers: { Authorization: `Bearer ${forgeKey}` },
+          });
+
+          if (!forgeResp.ok) {
+            res.writeHead(502, { "Content-Type": "text/plain" });
+            res.end("Storage backend error");
+            return;
+          }
+
+          const { url } = (await forgeResp.json()) as { url: string };
+          if (!url) {
+            res.writeHead(502, { "Content-Type": "text/plain" });
+            res.end("Empty signed URL");
+            return;
+          }
+
+          res.writeHead(307, { Location: url, "Cache-Control": "no-store" });
+          res.end();
+        } catch {
+          res.writeHead(502, { "Content-Type": "text/plain" });
+          res.end("Storage proxy error");
+        }
+      });
+    },
+  };
+}
+
+// ─── Collector Live API Plugin ──────────────────────────────────────────────
+// 在 Vite 开发服务器中挂载 /api/collector/* 路由，使用 Playwright 实时抓取
+function vitePluginCollectorApi(): Plugin {
+  return {
+    name: "collector-api",
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use("/api/collector", async (req, res) => {
+        const { getCollectorCards } = await import("./server/collectorScraper.js");
+        const url = req.url ?? "/";
+        const isRefresh = req.method === "POST" || url.includes("refresh");
+
+        try {
+          const data = await getCollectorCards(isRefresh);
+          res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify({
+            cards: data.cards,
+            total: data.total,
+            lastUpdated: data.lastUpdated,
+            mode: data.mode,
+          }));
+        } catch (err) {
+          console.error("[Collector API]", err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Collector scrape failed" }));
+        }
+      });
+    },
+  };
+}
+
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy(), vitePluginCollectorApi()];
 
 export default defineConfig({
   plugins,
@@ -163,12 +246,13 @@ export default defineConfig({
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
-  publicDir: path.resolve(import.meta.dirname, "client", "public"),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
   },
   server: {
+    port: 3000,
+    strictPort: false, // Will find next available port if 3000 is busy
     host: true,
     allowedHosts: [
       ".manuspre.computer",
