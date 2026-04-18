@@ -17,6 +17,7 @@ import {
 } from "./engine";
 import { ensureSafeFeedUrl } from "./engine/linkSafety";
 import { getLiveFallbackInsights } from "./engine/liveNews";
+import { enrichInsightPresentation } from "./engine/intelSignals";
 
 function toTimestamp(value: unknown) {
   if (!value) return 0;
@@ -63,7 +64,7 @@ export const appRouter = router({
         cursor: z.number().optional(),
         section: z.enum(["tcg", "web3", "collector"]).optional(),
         category: z.enum(["official", "community", "tournament", "cross_lang", "alert"]).optional(),
-        game: z.enum(["pokemon", "onepiece", "general"]).optional(),
+        game: z.enum(["pokemon", "onepiece", "yugioh", "general"]).optional(),
         keyword: z.string().optional(),
         source: z.string().optional(),
       }))
@@ -82,8 +83,9 @@ export const appRouter = router({
 
         const sourceRows = mergeInsightRows(rows, liveRows, input.limit);
         const items = sourceRows.map((r) => {
-          const g = applyComplianceGuard({ title: r.title, summary: r.summary });
-          return { ...r, title: g.title, summary: g.summary, disclaimer: g.disclaimer, imageCode: generateImageCode(r.insightId) };
+          const enhanced = enrichInsightPresentation(r as any);
+          const g = applyComplianceGuard({ title: enhanced.title, summary: enhanced.summary });
+          return { ...enhanced, title: g.title, summary: g.summary, disclaimer: g.disclaimer, imageCode: generateImageCode(r.insightId) };
         });
         const nextCursor = rows.length > 0 && rows.length === input.limit ? rows[rows.length - 1]?.id : undefined;
         return { items, nextCursor };
@@ -98,8 +100,9 @@ export const appRouter = router({
 
         const sourceRows = mergeInsightRows(rows, liveRows, input.limit);
         return sourceRows.map((r) => {
-          const g = applyComplianceGuard({ title: r.title, summary: r.summary });
-          return { ...r, title: g.title, summary: g.summary, disclaimer: g.disclaimer, imageCode: generateImageCode(r.insightId) };
+          const enhanced = enrichInsightPresentation(r as any);
+          const g = applyComplianceGuard({ title: enhanced.title, summary: enhanced.summary });
+          return { ...enhanced, title: g.title, summary: g.summary, disclaimer: g.disclaimer, imageCode: generateImageCode(r.insightId) };
         });
       }),
   }),
@@ -111,8 +114,17 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const rows = await getRecentAlerts(input.limit);
         return rows.map((r) => {
-          const g = applyComplianceGuard({ title: r.title, summary: r.description ?? "" });
-          return { ...r, title: g.title, description: g.summary, imageCode: generateImageCode(r.alertId) };
+          const enhanced = enrichInsightPresentation({
+            title: r.title,
+            summary: r.description ?? "",
+            source: r.source,
+            section: "tcg",
+            category: "alert",
+            game: "general",
+            isNew: 1,
+          });
+          const g = applyComplianceGuard({ title: enhanced.title, summary: enhanced.summary });
+          return { ...r, ...enhanced, title: g.title, description: g.summary, imageCode: generateImageCode(r.alertId) };
         });
       }),
   }),
@@ -195,7 +207,7 @@ export const appRouter = router({
         sourceType: z.enum(["rss", "html"]).default("rss"),
         section: z.enum(["tcg", "web3", "collector"]),
         category: z.enum(["official", "community", "tournament"]).default("community"),
-        game: z.enum(["pokemon", "onepiece", "general"]).default("general"),
+        game: z.enum(["pokemon", "onepiece", "yugioh", "general"]).default("general"),
       }))
       .mutation(async ({ input }) => {
         const safeUrl = ensureSafeFeedUrl(input.url);

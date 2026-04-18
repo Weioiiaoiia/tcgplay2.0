@@ -1,6 +1,13 @@
 import { createHash } from "crypto";
 import { ensureSafeFeedUrl, sanitizeOutboundUrl } from "./linkSafety";
 
+type InsightSection = "tcg" | "web3" | "collector";
+type InsightCategory = "official" | "community" | "tournament" | "cross_lang" | "alert";
+type SourceCategory = "official" | "community" | "tournament";
+type InsightGame = "pokemon" | "onepiece" | "yugioh" | "general";
+type SourceType = "rss" | "html";
+type HtmlParser = "onepiece_news" | "yugioh_news";
+
 export interface LiveInsightItem {
   id: number;
   insightId: string;
@@ -10,9 +17,9 @@ export interface LiveInsightItem {
   sourceUrl: string;
   originalTitle: string;
   scrapeMethod: string;
-  section: "tcg" | "web3" | "collector";
-  category: "official" | "community" | "tournament" | "cross_lang" | "alert";
-  game: "pokemon" | "onepiece" | "general";
+  section: InsightSection;
+  category: InsightCategory;
+  game: InsightGame;
   disclaimer: string;
   isNew: number;
   publishedAt: Date | null;
@@ -23,20 +30,35 @@ export interface LiveInsightItem {
 interface FeedSource {
   name: string;
   url: string;
-  section: "tcg" | "web3" | "collector";
-  category: "official" | "community" | "tournament";
-  game: "pokemon" | "onepiece" | "general";
+  sourceType?: SourceType;
+  parser?: HtmlParser;
+  section: InsightSection;
+  category: SourceCategory;
+  game: InsightGame;
   maxItems?: number;
   includeKeywords?: string[];
   excludeKeywords?: string[];
 }
 
+interface ParsedSourceItem {
+  title: string;
+  link: string;
+  summary: string;
+  pubDate: string;
+  category?: SourceCategory;
+  game?: InsightGame;
+}
+
+const DATE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}/i;
+
 const TCG_KEYWORDS = [
   "pokemon",
   "pokémon",
   "pikachu",
+  "scarlet & violet",
   "yu-gi-oh",
   "yugioh",
+  "duelist",
   "one piece",
   "opcg",
   "lorcana",
@@ -48,6 +70,80 @@ const TCG_KEYWORDS = [
   "booster",
   "deck",
   "tournament",
+  "regionals",
+  "championship",
+];
+
+const POKEMON_KEYWORDS = [
+  "pokemon",
+  "pokémon",
+  "pikachu",
+  "charizard",
+  "scarlet & violet",
+  "trainer trials",
+  "tcg live",
+  "ex",
+  "booster pack",
+];
+
+const ONEPIECE_KEYWORDS = [
+  "one piece",
+  "opcg",
+  "straw hat",
+  "pirates party",
+  "treasure cup",
+  "bandai card",
+  "don!!",
+  "op-",
+  "eb04",
+];
+
+const YUGIOH_KEYWORDS = [
+  "yu-gi-oh",
+  "yugioh",
+  "duel",
+  "duelist",
+  "ycs",
+  "regional qualifier",
+  "forbidden",
+  "limited list",
+  "core booster",
+  "speed duel",
+];
+
+const TOURNAMENT_KEYWORDS = [
+  "championship",
+  "regional",
+  "regionals",
+  "treasure cup",
+  "pirates party",
+  "qualifier",
+  "ycs",
+  "world championship",
+  "dragon duel",
+  "store championship",
+  "event",
+  "tournament",
+];
+
+const OFFICIAL_UPDATE_KEYWORDS = [
+  "updated",
+  "announcement",
+  "notice",
+  "release",
+  "launch",
+  "product",
+  "booster",
+  "deck",
+  "rules",
+  "rulebook",
+  "banned",
+  "restricted",
+  "forbidden",
+  "limited",
+  "patch notes",
+  "maintenance",
+  "version",
 ];
 
 const TABLETOP_EXCLUDE_KEYWORDS = [
@@ -144,11 +240,11 @@ const PUBLIC_FEEDS: FeedSource[] = [
     maxItems: 10,
   },
   {
-    name: "YGOrganization",
-    url: "https://ygorganization.com/feed/",
+    name: "Pokémon Forums",
+    url: "https://community.pokemon.com/en-us/categories/tcg-live-news-announcements/feed.rss",
     section: "tcg",
-    category: "community",
-    game: "general",
+    category: "official",
+    game: "pokemon",
     maxItems: 12,
   },
   {
@@ -157,6 +253,34 @@ const PUBLIC_FEEDS: FeedSource[] = [
     section: "tcg",
     category: "community",
     game: "pokemon",
+    maxItems: 12,
+  },
+  {
+    name: "ONE PIECE CARD GAME Official",
+    url: "https://en.onepiece-cardgame.com/news/",
+    sourceType: "html",
+    parser: "onepiece_news",
+    section: "tcg",
+    category: "official",
+    game: "onepiece",
+    maxItems: 12,
+  },
+  {
+    name: "Yu-Gi-Oh! Official",
+    url: "https://www.yugioh-card.com/en/news/",
+    sourceType: "html",
+    parser: "yugioh_news",
+    section: "tcg",
+    category: "official",
+    game: "yugioh",
+    maxItems: 10,
+  },
+  {
+    name: "YGOrganization",
+    url: "https://ygorganization.com/feed/",
+    section: "tcg",
+    category: "community",
+    game: "yugioh",
     maxItems: 12,
   },
   {
@@ -189,6 +313,10 @@ const PUBLIC_FEEDS: FeedSource[] = [
   },
 ];
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function decodeXml(text: string): string {
   return text
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
@@ -197,7 +325,9 @@ function decodeXml(text: string): string {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&#x27;/gi, "'");
+    .replace(/&#x27;/gi, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)));
 }
 
 function stripHtml(text: string): string {
@@ -207,6 +337,14 @@ function stripHtml(text: string): string {
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function resolveUrl(href: string, baseUrl: string): string {
+  try {
+    return new URL(href, baseUrl).toString();
+  } catch {
+    return href;
+  }
 }
 
 function getBlockTag(block: string, tag: string): string {
@@ -227,7 +365,7 @@ function collectBlocks(xml: string, tag: "item" | "entry"): string[] {
   return blocks;
 }
 
-function parseFeed(xml: string): Array<{ title: string; link: string; summary: string; pubDate: string }> {
+function parseFeed(xml: string): ParsedSourceItem[] {
   const normalized = decodeXml(xml);
   const entries = collectBlocks(normalized, "item");
   const atomEntries = collectBlocks(normalized, "entry");
@@ -268,6 +406,45 @@ function normalizeDate(input: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function inferGameFromText(text: string, fallback: InsightGame): InsightGame {
+  if (fallback !== "general") return fallback;
+  const haystack = text.toLowerCase();
+  const hasPokemon = POKEMON_KEYWORDS.some((keyword) => haystack.includes(keyword));
+  const hasOnePiece = ONEPIECE_KEYWORDS.some((keyword) => haystack.includes(keyword));
+  const hasYugioh = YUGIOH_KEYWORDS.some((keyword) => haystack.includes(keyword));
+
+  if (hasPokemon && !hasOnePiece && !hasYugioh) return "pokemon";
+  if (hasOnePiece && !hasPokemon && !hasYugioh) return "onepiece";
+  if (hasYugioh && !hasPokemon && !hasOnePiece) return "yugioh";
+  return fallback;
+}
+
+function inferCategoryFromText(text: string, fallback: SourceCategory): InsightCategory {
+  const haystack = text.toLowerCase();
+  if (TOURNAMENT_KEYWORDS.some((keyword) => haystack.includes(keyword))) return "tournament";
+  if (fallback === "official") return "official";
+  if (OFFICIAL_UPDATE_KEYWORDS.some((keyword) => haystack.includes(keyword))) return "official";
+  return fallback;
+}
+
+function normalizeSummary(summary: string, title: string, sourceName: string): string {
+  let result = stripHtml(summary || "");
+  if (!result) result = title;
+
+  result = result
+    .replace(/^\d{4}[\/-]\d{2}[\/-]\d{2}\s+\d{1,2}:\d{2}\s+/i, "")
+    .replace(/^\[[^\]]+\]\s*/g, "")
+    .replace(/\b(?:The post|This post) .*? appeared first on .*?\.?$/i, "")
+    .replace(/\bfirst appeared on .*?\.?$/i, "")
+    .replace(new RegExp(`^${escapeRegExp(sourceName)}\s+`, "i"), "")
+    .replace(new RegExp(`^${escapeRegExp(title)}\s*[-—:：]?\s*`, "i"), "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!result) result = title;
+  return result.slice(0, 360);
+}
+
 function matchesSourceFilters(source: FeedSource, item: { title: string; summary: string }) {
   const haystack = `${item.title} ${item.summary}`.toLowerCase();
   if (source.includeKeywords?.length) {
@@ -281,6 +458,123 @@ function matchesSourceFilters(source: FeedSource, item: { title: string; summary
   return true;
 }
 
+function buildOfficialSummary(franchise: string, title: string, category: InsightCategory): string {
+  if (category === "tournament") {
+    return `${franchise} 赛事侧出现新动态：${title}`.slice(0, 180);
+  }
+  if (/(banned|restricted|forbidden|limited|rule|maintenance|version|patch)/i.test(title)) {
+    return `${franchise} 官方规则或版本节奏有更新：${title}`.slice(0, 180);
+  }
+  if (/(product|booster|deck|collection|release|expansion|updated)/i.test(title)) {
+    return `${franchise} 产品与补货节奏出现新变化：${title}`.slice(0, 180);
+  }
+  return `${franchise} 官方情报更新：${title}`.slice(0, 180);
+}
+
+function parseOnePieceNewsHtml(html: string, baseUrl: string): ParsedSourceItem[] {
+  const items: ParsedSourceItem[] = [];
+  const seen = new Set<string>();
+  const anchorRegex = /<a[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = anchorRegex.exec(html)) !== null) {
+    const rawHref = match[1];
+    const href = resolveUrl(rawHref, baseUrl);
+    const text = stripHtml(match[2]);
+    const dateMatch = text.match(DATE_REGEX);
+    if (!dateMatch) continue;
+    if (!/onepiece-cardgame\.com/i.test(href)) continue;
+
+    const title = text
+      .replace(dateMatch[0], "")
+      .replace(/\b(NEWS|EVENTS|PRODUCTS|RULES|MAGAZINE|STREAM)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (title.length < 8 || /^(news|archive)$/i.test(title)) continue;
+    if (seen.has(href) || seen.has(title)) continue;
+    seen.add(href);
+
+    const category = inferCategoryFromText(`${text} ${title}`, "official");
+    items.push({
+      title,
+      link: href,
+      summary: buildOfficialSummary("ONE PIECE", title, category),
+      pubDate: dateMatch[0],
+      category: category === "tournament" ? "tournament" : "official",
+      game: "onepiece",
+    });
+  }
+
+  return items;
+}
+
+function parseYugiohNewsHtml(html: string, baseUrl: string): ParsedSourceItem[] {
+  const items: ParsedSourceItem[] = [];
+  const seen = new Set<string>();
+  const anchorRegex = /<a[^>]*href=["']([^"']*\/en\/news\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = anchorRegex.exec(html)) !== null) {
+    const href = resolveUrl(match[1], baseUrl);
+    const title = stripHtml(match[2]).replace(/\s+/g, " ").trim();
+    if (title.length < 8 || /^(news|latest news)$/i.test(title)) continue;
+    if (seen.has(href) || seen.has(title)) continue;
+
+    const surrounding = `${html.slice(Math.max(0, match.index - 120), match.index)} ${html.slice(match.index + match[0].length, match.index + match[0].length + 520)}`;
+    const dateMatch = surrounding.match(DATE_REGEX);
+    const category = inferCategoryFromText(title, "official");
+    seen.add(href);
+
+    items.push({
+      title,
+      link: href,
+      summary: buildOfficialSummary("Yu-Gi-Oh!", title, category),
+      pubDate: dateMatch?.[0] || "",
+      category: category === "tournament" ? "tournament" : "official",
+      game: "yugioh",
+    });
+  }
+
+  return items;
+}
+
+function parseHtmlBySource(source: FeedSource, html: string, baseUrl: string): ParsedSourceItem[] {
+  if (source.parser === "onepiece_news") return parseOnePieceNewsHtml(html, baseUrl);
+  if (source.parser === "yugioh_news") return parseYugiohNewsHtml(html, baseUrl);
+  return [];
+}
+
+function toLiveInsight(source: FeedSource, item: ParsedSourceItem, fetchedAt: Date, index: number): LiveInsightItem {
+  const publishedAt = normalizeDate(item.pubDate);
+  const createdAt = publishedAt ?? fetchedAt;
+  const rawText = `${item.title} ${item.summary}`;
+  const game = item.game ?? inferGameFromText(rawText, source.game);
+  const category = item.category ?? inferCategoryFromText(rawText, source.category);
+  const title = item.title.slice(0, 512);
+  const summary = normalizeSummary(item.summary || item.title, title, source.name);
+  const insightId = makeInsightId(`${source.name}|${item.link}|${title}`);
+
+  return {
+    id: fetchedAt.getTime() + index,
+    insightId,
+    title,
+    summary,
+    source: source.name,
+    sourceUrl: sanitizeOutboundUrl(resolveUrl(item.link, source.url), source.url),
+    originalTitle: title,
+    scrapeMethod: source.sourceType === "html" ? "live_html" : "live_rss",
+    section: source.section,
+    category,
+    game,
+    disclaimer: source.sourceType === "html" ? "Live public HTML news aggregation." : "Live public RSS feed aggregation.",
+    isNew: 1,
+    publishedAt,
+    fetchedAt,
+    createdAt,
+  };
+}
+
 async function fetchFeed(source: FeedSource): Promise<LiveInsightItem[]> {
   const safeFeedUrl = ensureSafeFeedUrl(source.url);
   const response = await fetch(safeFeedUrl, {
@@ -291,44 +585,24 @@ async function fetchFeed(source: FeedSource): Promise<LiveInsightItem[]> {
     throw new Error(`${source.name}: HTTP ${response.status}`);
   }
 
-  const xml = await response.text();
-  const items = parseFeed(xml)
+  const raw = await response.text();
+  const parsedItems = source.sourceType === "html"
+    ? parseHtmlBySource(source, raw, safeFeedUrl)
+    : parseFeed(raw);
+
+  const items = parsedItems
     .filter((item) => item.title && item.link)
     .filter((item) => matchesSourceFilters(source, item));
+
   const fetchedAt = new Date();
-
-  return items.slice(0, source.maxItems ?? 12).map((item, index) => {
-    const publishedAt = normalizeDate(item.pubDate);
-    const createdAt = publishedAt ?? fetchedAt;
-    const summary = item.summary || item.title;
-    const insightId = makeInsightId(`${source.name}|${item.link}|${item.title}`);
-
-    return {
-      id: fetchedAt.getTime() + index,
-      insightId,
-      title: item.title.slice(0, 512),
-      summary: summary.slice(0, 1200),
-      source: source.name,
-      sourceUrl: sanitizeOutboundUrl(item.link, safeFeedUrl),
-      originalTitle: item.title.slice(0, 512),
-      scrapeMethod: "live_rss",
-      section: source.section,
-      category: source.category,
-      game: source.game,
-      disclaimer: "Live public RSS feed aggregation.",
-      isNew: 1,
-      publishedAt,
-      fetchedAt,
-      createdAt,
-    };
-  });
+  return items.slice(0, source.maxItems ?? 12).map((item, index) => toLiveInsight(source, item, fetchedAt, index));
 }
 
 export async function getLiveFallbackInsights(input: {
   limit: number;
-  section?: "tcg" | "web3" | "collector";
-  category?: "official" | "community" | "tournament" | "cross_lang" | "alert";
-  game?: "pokemon" | "onepiece" | "general";
+  section?: InsightSection;
+  category?: InsightCategory;
+  game?: InsightGame;
   keyword?: string;
   source?: string;
 }): Promise<LiveInsightItem[]> {

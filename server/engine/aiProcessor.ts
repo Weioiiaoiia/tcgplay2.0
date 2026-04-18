@@ -5,6 +5,7 @@
  */
 import { invokeLLM } from "../_core/llm";
 import { applyComplianceGuard, generateImageCode, DISCLAIMER } from "./complianceGuard";
+import { deriveAlertMetadata } from "./intelSignals";
 import type { RawArticle } from "./scraper";
 import { getDb } from "../db";
 import { insights, alerts } from "../../drizzle/schema";
@@ -22,7 +23,7 @@ export interface ProcessedInsight {
   originalTitle: string;
   section: "tcg" | "web3" | "collector";
   category: "official" | "community" | "tournament" | "cross_lang" | "alert";
-  game: "pokemon" | "onepiece" | "general";
+  game: "pokemon" | "onepiece" | "yugioh" | "general";
   imageCode: string;
   publishedAt: Date | null;
   fetchedAt: Date;
@@ -33,6 +34,7 @@ async function processSingle(article: RawArticle): Promise<{
   insight: ProcessedInsight | null;
   isAlert: boolean;
   alertKeywords: string;
+  alertSeverity: "high" | "medium" | "low";
 }> {
   const fetchedAt = new Date();
   const insightId = nanoid(16);
@@ -40,6 +42,7 @@ async function processSingle(article: RawArticle): Promise<{
   let summary = article.content;
   let isAlert = false;
   let alertKeywords = "";
+  let alertSeverity: "high" | "medium" | "low" = "medium";
 
   // Parse original publish date
   let publishedAt: Date | null = null;
@@ -92,6 +95,21 @@ async function processSingle(article: RawArticle): Promise<{
     }
   }
 
+  const derived = deriveAlertMetadata({
+    title,
+    summary,
+    source: article.sourceName,
+    section: article.section,
+    category: article.category,
+    game: article.game,
+    isNew: 1,
+  });
+
+  summary = derived.summary;
+  if (derived.isAlert) isAlert = true;
+  if (derived.alertKeywords) alertKeywords = derived.alertKeywords;
+  alertSeverity = derived.severity;
+
   const guarded = applyComplianceGuard({ title, summary });
   const imageCode = generateImageCode(insightId);
 
@@ -112,6 +130,7 @@ async function processSingle(article: RawArticle): Promise<{
     },
     isAlert,
     alertKeywords,
+    alertSeverity,
   };
 }
 
@@ -143,7 +162,7 @@ export async function processArticles(articles: RawArticle[]): Promise<{
   const savedInsights: ProcessedInsight[] = [];
 
   if (db) {
-    const savePromises = allResults.map(async ({ insight, isAlert, alertKeywords }) => {
+    const savePromises = allResults.map(async ({ insight, isAlert, alertKeywords, alertSeverity }) => {
       if (!insight) return;
       try {
         await db.insert(insights).values({
@@ -170,7 +189,7 @@ export async function processArticles(articles: RawArticle[]): Promise<{
             alertId,
             title: insight.title.slice(0, 512),
             description: insight.summary.slice(0, 2000),
-            severity: "medium",
+            severity: alertSeverity,
             matchedKeywords: alertKeywords,
             source: insight.source,
             sourceUrl: insight.sourceUrl,

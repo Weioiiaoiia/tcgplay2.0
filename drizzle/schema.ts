@@ -25,7 +25,7 @@ export const insights = mysqlTable("insights", {
   scrapeMethod: varchar("scrapeMethod", { length: 32 }).default("rss"),
   section: mysqlEnum("section", ["tcg", "web3", "collector"]).notNull(),
   category: mysqlEnum("category", ["official", "community", "tournament", "cross_lang", "alert"]).default("community").notNull(),
-  game: mysqlEnum("game", ["pokemon", "onepiece", "general"]).default("general").notNull(),
+  game: mysqlEnum("game", ["pokemon", "onepiece", "yugioh", "general"]).default("general").notNull(),
   disclaimer: text("disclaimer"),
   isNew: int("isNew").default(1),
   publishedAt: timestamp("publishedAt"),
@@ -83,7 +83,7 @@ export const scrapeSources = mysqlTable("scrape_sources", {
   sourceType: mysqlEnum("sourceType", ["rss", "html"]).default("rss").notNull(),
   section: mysqlEnum("section", ["tcg", "web3", "collector"]).notNull(),
   category: mysqlEnum("category", ["official", "community", "tournament"]).default("community").notNull(),
-  game: mysqlEnum("game", ["pokemon", "onepiece", "general"]).default("general").notNull(),
+  game: mysqlEnum("game", ["pokemon", "onepiece", "yugioh", "general"]).default("general").notNull(),
   enabled: boolean("enabled").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

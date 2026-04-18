@@ -17,7 +17,7 @@ export interface RawArticle {
   sourceUrl: string;
   section: "tcg" | "web3" | "collector";
   category: "official" | "community" | "tournament";
-  game: "pokemon" | "onepiece" | "general";
+  game: "pokemon" | "onepiece" | "yugioh" | "general";
 }
 
 const RSSHUB_MIRRORS = [

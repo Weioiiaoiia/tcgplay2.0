@@ -3,12 +3,27 @@ import TopNav from "@/components/TopNav";
 import { trpc } from "@/lib/trpc";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, RefreshCw, ArrowRight, Radio, Newspaper, ExternalLink } from "lucide-react";
+import { Search, RefreshCw, ArrowRight, Radio, Newspaper, ExternalLink, Flame, Sparkles } from "lucide-react";
 
-const 说明文字 = "本页内容由系统自动聚合整理，仅供信息参考。平台与原始内容发布者及其权利方无隶属关系，相关商标归各自权利人所有，页面不存储或分发受版权保护的原始图片资源。";
+const 说明文字 = "本页内容由系统自动聚合、摘要与分类，仅供行业观察和运营参考，不构成任何投资、交易、购买、版权授权或官方公告替代依据。";
+const 免责声明条目 = [
+  {
+    title: "信息参考",
+    text: "页面内容为自动抓取与算法整理结果，可能存在延迟、遗漏或摘要偏差，实际信息请以原始来源与官方公告为准。",
+  },
+  {
+    title: "版权与商标",
+    text: "相关新闻、标题、商标、角色名称与品牌标识均归原始发布方或各自权利人所有，页面仅做索引与摘要展示，不存储或分发受版权保护的原始图片资源。",
+  },
+  {
+    title: "非官方关系",
+    text: "本功能与 Pokémon、One Piece、Yu-Gi-Oh 及其他内容来源的权利方不存在官方隶属、授权代运营或背书关系。",
+  },
+] as const;
 
 type Section = "all" | "tcg" | "web3";
 type Category = "all" | "official" | "community" | "tournament" | "cross_lang";
+type Game = "all" | "pokemon" | "onepiece" | "yugioh";
 
 const sections: { id: Section; label: string }[] = [
   { id: "all", label: "全部" },
@@ -24,6 +39,13 @@ const categories: { id: Category; label: string }[] = [
   { id: "cross_lang", label: "跨语种" },
 ];
 
+const games: { id: Game; label: string }[] = [
+  { id: "all", label: "全部游戏" },
+  { id: "pokemon", label: "Pokémon" },
+  { id: "onepiece", label: "One Piece" },
+  { id: "yugioh", label: "Yu-Gi-Oh" },
+];
+
 const DEMO_ITEMS = [
   {
     id: "demo-1",
@@ -33,6 +55,11 @@ const DEMO_ITEMS = [
     sourceUrl: "https://www.coindesk.com/arc/outboundfeeds/rss/",
     section: "web3",
     category: "official",
+    game: "pokemon",
+    signalLabel: "热度/价格",
+    signalSeverity: "medium",
+    signalScore: 72,
+    matchedKeywords: ["market", "surge", "demand"],
     createdAt: new Date().toISOString(),
     publishedAt: new Date().toISOString(),
     isNew: 1,
@@ -42,33 +69,48 @@ const DEMO_ITEMS = [
     title: "宝可梦卡牌社区热度回升，讨论焦点转向新卡稀有度与补货节奏",
     summary: "右侧快讯卡片会优先突出短标题与时间，适合快速扫读并进入原始来源。",
     source: "演示编辑台",
-    sourceUrl: "https://www.pokebeach.com/feed",
+    sourceUrl: "https://community.pokemon.com/en-us/categories/tcg-live-news-announcements/feed.rss",
     section: "tcg",
-    category: "community",
+    category: "official",
+    game: "pokemon",
+    signalLabel: "新品/补货",
+    signalSeverity: "high",
+    signalScore: 88,
+    matchedKeywords: ["pokemon", "restock", "booster"],
     createdAt: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
     publishedAt: new Date(Date.now() - 22 * 60 * 1000).toISOString(),
     isNew: 1,
   },
   {
     id: "demo-3",
-    title: "情报入口收敛为单页之后，浏览链路更清晰，注意力更集中",
+    title: "ONE PIECE 官方赛事体系更新，活动节点与参与节奏更加清晰",
     summary: "你现在进入站点后会直接进入情报流，不再被多余入口分散注意力。",
-    source: "演示编辑台",
-    sourceUrl: "https://decrypt.co/feed",
-    section: "web3",
-    category: "official",
+    source: "ONE PIECE CARD GAME Official",
+    sourceUrl: "https://en.onepiece-cardgame.com/news/",
+    section: "tcg",
+    category: "tournament",
+    game: "onepiece",
+    signalLabel: "赛事升级",
+    signalSeverity: "high",
+    signalScore: 90,
+    matchedKeywords: ["championship", "event", "one piece"],
     createdAt: new Date(Date.now() - 68 * 60 * 1000).toISOString(),
     publishedAt: new Date(Date.now() - 75 * 60 * 1000).toISOString(),
     isNew: 0,
   },
   {
     id: "demo-4",
-    title: "卡片信息墙强化快读体验，适合承载高频碎片情报",
+    title: "Yu-Gi-Oh! 官方新闻加入后，可直接按游戏维度追踪规则与赛事变化",
     summary: "中段信息区使用统一边框、暖白玻璃感与柔和阴影，让页面节奏更接近你指定仓库的展陈风格。",
-    source: "演示编辑台",
-    sourceUrl: "https://pokeguardian.com/feed",
+    source: "Yu-Gi-Oh! Official",
+    sourceUrl: "https://www.yugioh-card.com/en/news/",
     section: "tcg",
-    category: "community",
+    category: "official",
+    game: "yugioh",
+    signalLabel: "禁限/规则",
+    signalSeverity: "high",
+    signalScore: 94,
+    matchedKeywords: ["yugioh", "rulebook", "statement"],
     createdAt: new Date(Date.now() - 95 * 60 * 1000).toISOString(),
     publishedAt: new Date(Date.now() - 102 * 60 * 1000).toISOString(),
     isNew: 1,
@@ -81,6 +123,11 @@ const DEMO_ITEMS = [
     sourceUrl: "https://www.mtggoldfish.com/articles.rss",
     section: "tcg",
     category: "tournament",
+    game: "onepiece",
+    signalLabel: "赛事升级",
+    signalSeverity: "medium",
+    signalScore: 70,
+    matchedKeywords: ["tournament", "regional"],
     createdAt: new Date(Date.now() - 155 * 60 * 1000).toISOString(),
     publishedAt: new Date(Date.now() - 160 * 60 * 1000).toISOString(),
     isNew: 0,
@@ -93,6 +140,11 @@ const DEMO_ITEMS = [
     sourceUrl: "https://limitlesstcg.com/blog/feed",
     section: "web3",
     category: "community",
+    game: "yugioh",
+    signalLabel: "联动/IP",
+    signalSeverity: "low",
+    signalScore: 56,
+    matchedKeywords: ["promo", "community"],
     createdAt: new Date(Date.now() - 180 * 60 * 1000).toISOString(),
     publishedAt: new Date(Date.now() - 190 * 60 * 1000).toISOString(),
     isNew: 0,
@@ -111,6 +163,13 @@ function formatCategoryLabel(category?: string) {
   if (category === "tournament") return "赛事";
   if (category === "cross_lang") return "跨语种";
   return "全部来源";
+}
+
+function formatGameLabel(game?: string) {
+  if (game === "pokemon") return "Pokémon";
+  if (game === "onepiece") return "One Piece";
+  if (game === "yugioh") return "Yu-Gi-Oh";
+  return "综合";
 }
 
 function timeAgo(d: string | Date) {
@@ -145,9 +204,34 @@ function getSectionTone(section?: string) {
   }
 }
 
+function getGameTone(game?: string) {
+  switch (game) {
+    case "pokemon":
+      return "bg-amber-50 text-amber-700 border border-amber-200/80";
+    case "onepiece":
+      return "bg-sky-50 text-sky-700 border border-sky-200/80";
+    case "yugioh":
+      return "bg-indigo-50 text-indigo-700 border border-indigo-200/80";
+    default:
+      return "bg-slate-50 text-slate-700 border border-slate-200/80";
+  }
+}
+
+function getSignalTone(signalSeverity?: string) {
+  switch (signalSeverity) {
+    case "high":
+      return "bg-red-50 text-red-700 border border-red-200/80";
+    case "medium":
+      return "bg-orange-50 text-orange-700 border border-orange-200/80";
+    default:
+      return "bg-zinc-50 text-zinc-700 border border-zinc-200/80";
+  }
+}
+
 export default function IntelFeed() {
   const [section, setSection] = useState<Section>("all");
   const [category, setCategory] = useState<Category>("all");
+  const [game, setGame] = useState<Game>("all");
   const [searchInput, setSearchInput] = useState("");
   const [keyword, setKeyword] = useState("");
   const [cursor, setCursor] = useState<number | undefined>(undefined);
@@ -160,10 +244,11 @@ export default function IntelFeed() {
       limit: 50,
       section: section === "all" ? undefined : section,
       category: category === "all" ? undefined : category,
+      game: game === "all" ? undefined : game,
       keyword: keyword || undefined,
       cursor,
     }),
-    [section, category, keyword, cursor],
+    [section, category, game, keyword, cursor],
   );
 
   const { data, isLoading, isFetching, refetch } = trpc.insights.list.useQuery(queryInput, {
@@ -193,7 +278,7 @@ export default function IntelFeed() {
 
   useEffect(() => {
     resetAndFetch();
-  }, [section, category, keyword, resetAndFetch]);
+  }, [section, category, game, keyword, resetAndFetch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,6 +314,7 @@ export default function IntelFeed() {
   const streamItems = displayItems.slice(10);
 
   const sourceCount = useMemo(() => new Set(displayItems.map((item: any) => item.source)).size, [displayItems]);
+  const highPriorityCount = useMemo(() => displayItems.filter((item: any) => item.signalSeverity === "high").length, [displayItems]);
   const latestTime = featured?.createdAt ? timeAgo(featured.createdAt) : "暂无";
 
   return (
@@ -272,12 +358,12 @@ export default function IntelFeed() {
             transition={{ duration: 0.62, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
             className="grid gap-4 sm:grid-cols-2"
           >
-            {[
-              { label: "已加载情报", value: isLoading ? "…" : `${displayItems.length}${hasMore ? "+" : ""}`, desc: "当前可浏览条目" },
-              { label: "覆盖来源", value: isLoading ? "…" : `${sourceCount}`, desc: "去重后的情报源数量" },
-              { label: "最新动态", value: latestTime, desc: "最近一条抓取时间" },
-              { label: "当前状态", value: isFetching ? "更新中" : isDemoMode ? "演示中" : "在线", desc: "数据接口运行状态" },
-            ].map((item) => (
+              {[
+                { label: "已加载情报", value: isLoading ? "…" : `${displayItems.length}${hasMore ? "+" : ""}`, desc: "当前可浏览条目" },
+                { label: "覆盖来源", value: isLoading ? "…" : `${sourceCount}`, desc: "去重后的情报源数量" },
+                { label: "高优先级", value: isLoading ? "…" : `${highPriorityCount}`, desc: "爆点提醒候选数量" },
+                { label: "当前状态", value: isFetching ? "更新中" : isDemoMode ? "演示中" : latestTime, desc: isFetching ? "数据接口运行状态" : "最近一条抓取时间" },
+              ].map((item) => (
               <div key={item.label} className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
                 <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">{item.label}</div>
                 <div className="mt-3 text-3xl font-semibold text-neutral-950">{item.value}</div>
@@ -340,6 +426,22 @@ export default function IntelFeed() {
             ))}
           </div>
 
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {games.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setGame(item.id)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
+                  game === item.id
+                    ? "bg-[#8b6b42] text-white"
+                    : "border border-black/8 bg-[#f8f3ea] text-black/58 hover:bg-black/6 hover:text-black"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           <form onSubmit={handleSearch} className="mt-5 flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-black/25" />
@@ -372,14 +474,32 @@ export default function IntelFeed() {
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getSectionTone(featured.section)}`}>
                   {formatSectionLabel(featured.section)}
                 </span>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getGameTone(featured.game)}`}>
+                  {formatGameLabel(featured.game)}
+                </span>
                 <span className="rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-1 text-xs font-medium text-black/58">
                   {formatCategoryLabel(featured.category)}
                 </span>
+                {featured.signalLabel && (
+                  <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${getSignalTone(featured.signalSeverity)}`}>
+                    <Flame className="h-3.5 w-3.5" />
+                    {featured.signalLabel}
+                  </span>
+                )}
                 <span className="ml-auto text-xs text-black/35">{timeAgo(featured.createdAt)}</span>
               </div>
               <div className="mt-5 text-[0.62rem] uppercase tracking-[0.24em] text-black/30">重点情报</div>
               <h2 className="mt-3 text-3xl font-semibold leading-tight text-neutral-950 sm:text-[2.4rem]">{featured.title}</h2>
               <p className="mt-5 max-w-3xl text-[0.98rem] leading-8 text-black/56">{featured.summary}</p>
+              {!!featured.matchedKeywords?.length && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {featured.matchedKeywords.slice(0, 6).map((tag: string) => (
+                    <span key={tag} className="rounded-full border border-black/8 bg-[#f6f2eb] px-3 py-1 text-[11px] font-medium text-black/58">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.3rem] border border-black/8 bg-[#fbf8f2] px-4 py-3">
                   <div className="text-[0.58rem] uppercase tracking-[0.22em] text-black/28">来源</div>
@@ -412,14 +532,32 @@ export default function IntelFeed() {
                   transition={{ duration: 0.3, delay: index * 0.06 }}
                   className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl transition hover:-translate-y-0.5"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getSectionTone(item.section)}`}>
                       {formatSectionLabel(item.section)}
                     </span>
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getGameTone(item.game)}`}>
+                      {formatGameLabel(item.game)}
+                    </span>
+                    {item.signalLabel && (
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getSignalTone(item.signalSeverity)}`}>
+                        <Flame className="h-3 w-3" />
+                        {item.signalLabel}
+                      </span>
+                    )}
                     <span className="text-xs text-black/35">{timeAgo(item.createdAt)}</span>
                   </div>
                   <h3 className="mt-4 text-xl font-semibold leading-snug text-neutral-950">{item.title}</h3>
                   <p className="mt-2 line-clamp-3 text-sm leading-7 text-black/52">{item.summary}</p>
+                  {!!item.matchedKeywords?.length && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {item.matchedKeywords.slice(0, 3).map((tag: string) => (
+                        <span key={tag} className="rounded-full border border-black/8 bg-[#f6f2eb] px-2.5 py-1 text-[11px] text-black/52">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-5 flex items-center justify-between text-xs text-black/38">
                     <span className="font-medium text-black/58">{item.source}</span>
                     <span>{formatCategoryLabel(item.category)}</span>
@@ -452,10 +590,19 @@ export default function IntelFeed() {
                   rel="noopener noreferrer"
                   className="group rounded-[1.5rem] border border-black/8 bg-[#fbf8f2] p-5 transition hover:-translate-y-0.5 hover:bg-white"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getSectionTone(item.section)}`}>
                       {formatSectionLabel(item.section)}
                     </span>
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getGameTone(item.game)}`}>
+                      {formatGameLabel(item.game)}
+                    </span>
+                    {item.signalLabel && (
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getSignalTone(item.signalSeverity)}`}>
+                        <Sparkles className="h-3 w-3" />
+                        {item.signalLabel}
+                      </span>
+                    )}
                     {item.isNew === 1 && (
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                         最新
@@ -464,6 +611,15 @@ export default function IntelFeed() {
                   </div>
                   <h3 className="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-neutral-950">{item.title}</h3>
                   <p className="mt-3 line-clamp-4 text-sm leading-7 text-black/52">{item.summary}</p>
+                  {!!item.matchedKeywords?.length && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {item.matchedKeywords.slice(0, 3).map((tag: string) => (
+                        <span key={tag} className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-[11px] text-black/52">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-5 border-t border-black/6 pt-4 text-xs text-black/38">
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-medium text-black/58">{item.source}</span>
@@ -506,6 +662,15 @@ export default function IntelFeed() {
                       <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getSectionTone(item.section)}`}>
                         {formatSectionLabel(item.section)}
                       </span>
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getGameTone(item.game)}`}>
+                        {formatGameLabel(item.game)}
+                      </span>
+                      {item.signalLabel && (
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getSignalTone(item.signalSeverity)}`}>
+                          <Flame className="h-3 w-3" />
+                          {item.signalLabel}
+                        </span>
+                      )}
                       <span className="text-xs text-black/32">{timeAgo(item.createdAt)}</span>
                     </div>
                     <p className="mt-2 text-xs leading-5 text-black/32">{fmtDateTime(item.publishedAt) || fmtDateTime(item.createdAt)}</p>
@@ -516,6 +681,15 @@ export default function IntelFeed() {
                       <ExternalLink className="mt-0.5 h-4 w-4 flex-shrink-0 text-black/25 transition group-hover:text-black/55" />
                     </div>
                     <p className="mt-2 line-clamp-2 text-sm leading-7 text-black/55">{item.summary}</p>
+                    {!!item.matchedKeywords?.length && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {item.matchedKeywords.slice(0, 4).map((tag: string) => (
+                          <span key={tag} className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-[11px] text-black/52">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-black/35">
                       <span className="font-medium text-black/58">{item.source}</span>
                       <span>·</span>
@@ -545,13 +719,27 @@ export default function IntelFeed() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[2rem] border border-black/8 bg-white/84 p-6 shadow-[0_28px_100px_-48px_rgba(24,24,27,0.32)] backdrop-blur-xl">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-[#f6f2eb] px-4 py-2 text-sm font-medium text-black/62">
-              <Newspaper className="h-4 w-4" />
-              使用真实抓取与安全链接过滤
+        <section className="mt-6 rounded-[2rem] border border-amber-200/80 bg-[linear-gradient(180deg,rgba(255,250,240,0.96)_0%,rgba(255,246,229,0.92)_100%)] p-6 shadow-[0_28px_100px_-48px_rgba(24,24,27,0.32)] backdrop-blur-xl">
+          <div className="mx-auto max-w-5xl">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">免责声明</div>
+                <h2 className="mt-2 text-2xl font-semibold text-neutral-950">数据使用与版权说明</h2>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/70 bg-white/80 px-4 py-2 text-sm font-medium text-black/62">
+                <Newspaper className="h-4 w-4" />
+                使用真实抓取与安全链接过滤
+              </div>
             </div>
-            <p className="mt-4 text-sm leading-7 text-black/48">{说明文字}</p>
+            <p className="mt-4 max-w-4xl text-sm leading-7 text-black/56">{说明文字}</p>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {免责声明条目.map((item) => (
+                <div key={item.title} className="rounded-[1.4rem] border border-black/8 bg-white/85 p-4">
+                  <div className="text-sm font-semibold text-neutral-950">{item.title}</div>
+                  <p className="mt-2 text-sm leading-7 text-black/52">{item.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </main>
