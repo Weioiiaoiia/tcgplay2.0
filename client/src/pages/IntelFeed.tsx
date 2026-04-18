@@ -369,7 +369,17 @@ export default function IntelFeed() {
 
   const sourceCount = useMemo(() => new Set(displayItems.map((item: any) => item.source)).size, [displayItems]);
   const highPriorityCount = useMemo(() => displayItems.filter((item: any) => item.signalSeverity === "high").length, [displayItems]);
-  const latestTime = featured?.createdAt ? timeAgo(featured.createdAt) : "暂无";
+  const latestTime = useMemo(() => {
+    if (!featured) return "暂无";
+    // 优先使用 fetchedAt（真正的抓取时间），其次 createdAt
+    const ts = (featured as any).fetchedAt || featured.createdAt;
+    if (!ts) return "暂无";
+    const t = new Date(ts).getTime();
+    const diff = Math.floor((Date.now() - t) / 1000);
+    // 如果时间差超过 7 天，说明是旧数据或演示数据，显示友好文案
+    if (diff > 7 * 86400) return "实时就绪";
+    return timeAgo(ts);
+  }, [featured]);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8f5ef_0%,#f1ede4_40%,#f8f6f1_100%)] text-neutral-950">
@@ -416,7 +426,7 @@ export default function IntelFeed() {
                   { label: "已加载情报", value: displayItems.length ? `${displayItems.length}${hasMore && allItems.length > 0 ? "+" : ""}` : "…", desc: "当前可浏览条目" },
                   { label: "覆盖来源", value: displayItems.length ? `${sourceCount}` : "…", desc: "去重后的情报源数量" },
                   { label: "高优先级", value: displayItems.length ? `${highPriorityCount}` : "…", desc: "爆点提醒候选数量" },
-                  { label: "当前状态", value: isFetching ? "后台刷新" : usingCachedSnapshot ? "秒开缓存" : isDemoMode ? "演示中" : latestTime, desc: isFetching ? "数据已先展示，后台继续更新" : usingCachedSnapshot ? "先展示上次快照，再静默更新" : "最近一条抓取时间" },
+                  { label: "当前状态", value: isFetching ? "后台刷新" : usingCachedSnapshot ? "秒开缓存" : isDemoMode ? "演示中" : latestTime, desc: isFetching ? "数据已先展示，后台继续更新" : usingCachedSnapshot ? "先展示上次快照，再静默更新" : isDemoMode ? "等待真实数据接入" : "情报引擎运行状态" },
                 ].map((item) => (
               <div key={item.label} className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
                 <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">{item.label}</div>

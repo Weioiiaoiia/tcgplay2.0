@@ -333,12 +333,12 @@ export interface CardData {
   type: string;
 }
 
-// Parse FMV from cents string to USD number
+// Parse FMV — API returns value in cents, divide by 100 to get USD
 export function parseFMV(raw: string | number | null | undefined): number {
   if (!raw) return 0;
   const num = parseFloat(String(raw));
-  if (num > 1000) return num / 100;
-  return num;
+  if (!Number.isFinite(num) || num <= 0) return 0;
+  return num > 1000 ? num / 100 : num;
 }
 
 // Extract numeric grade from grade string

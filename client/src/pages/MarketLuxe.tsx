@@ -41,6 +41,9 @@ type UnifiedCard =
 
 const PAGE_STEP = 30;
 
+const PREMIUM_TEST_CODE = "TCG77ouo";
+const PREMIUM_LS_KEY = "tcgplay2_premium_unlocked";
+
 const sortOptions: { label: string; value: SortBy }[] = [
   { label: "最新上架", value: "newest" },
   { label: "价格 低→高", value: "price-asc" },
@@ -49,6 +52,122 @@ const sortOptions: { label: string; value: SortBy }[] = [
   { label: "FMV", value: "fmv" },
   { label: "溢价率", value: "premium" },
 ];
+
+/** 溢价率测试码弹窗 */
+function PremiumUnlockModal({
+  open,
+  onClose,
+  onUnlock,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onUnlock: () => void;
+}) {
+  const [code, setCode] = useState("");
+  const [error, setError] = useState(false);
+  const [shaking, setShaking] = useState(false);
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (code.trim() === PREMIUM_TEST_CODE) {
+      try { localStorage.setItem(PREMIUM_LS_KEY, "1"); } catch {}
+      onUnlock();
+    } else {
+      setError(true);
+      setShaking(true);
+      setTimeout(() => setShaking(false), 500);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-[rgba(12,10,8,0.6)] p-4 backdrop-blur-md"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 24 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: 24 }}
+        transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+        className={`relative w-full max-w-[420px] overflow-hidden rounded-[1.6rem] border border-[#e7dece] bg-[#fbf8f1] shadow-[0_30px_90px_-20px_rgba(30,24,14,0.5)] ${
+          shaking ? "animate-[headShake_0.5s_ease-in-out]" : ""
+        }`}
+      >
+        {/* 顶部装饰条 */}
+        <div className="h-1 w-full bg-gradient-to-r from-[#c8a84a] via-[#e8d48a] to-[#c8a84a]" />
+
+        <div className="px-6 pt-6 pb-7">
+          {/* 标题区 */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[0.8rem] bg-gradient-to-br from-[#f0e6cc] to-[#e8d8b0] shadow-inner">
+              <svg className="h-5 w-5 text-[#8b6b2a]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-[1.15rem] font-semibold tracking-[-0.03em] text-[#1a1612]">
+                溢价率功能测试
+              </h3>
+              <div className="mt-0.5 flex items-center gap-2">
+                <span className="rounded-full border border-[#e0d090] bg-[#fdf6e3] px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] text-[#8b6b2a]">Beta</span>
+                <span className="text-[11px] text-[#a89880]">限量内测</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 输入区 */}
+          <div className="mt-6">
+            <label className="mb-2 block text-[12px] font-medium text-[#6b6055]">请输入测试码</label>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => { setCode(e.target.value); setError(false); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+              placeholder="输入测试码…"
+              className={`h-12 w-full rounded-[0.95rem] border bg-white px-4 text-[14px] text-[#1a1612] placeholder:text-[#c0b8a8] outline-none transition-all focus:border-[#c8a84a] focus:ring-2 focus:ring-[#c8a84a]/20 ${
+                error ? "border-[#e05050] ring-2 ring-[#e05050]/20" : "border-[#e0d8cc]"
+              }`}
+              autoFocus
+            />
+            {error && (
+              <p className="mt-2 text-[12px] font-medium text-[#d04040]">测试码不正确，请重新输入</p>
+            )}
+          </div>
+
+          {/* 底部提示 */}
+          <p className="mt-4 text-[11px] leading-5 text-[#a89880]">
+            需要测试码请{" "}
+            <a
+              href="https://x.com/chen1904o"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[#6b8cce] underline decoration-[#6b8cce]/30 underline-offset-2 transition hover:text-[#4a6eb8]"
+            >
+              前往官网获取邀请码
+            </a>
+          </p>
+
+          {/* 按钮组 */}
+          <div className="mt-6 flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 rounded-full border border-[#e0d8cc] bg-[#faf7f2] py-3 text-[13px] font-medium text-[#6b6055] transition-all hover:border-[#1a1612] hover:bg-[#1a1612] hover:text-white"
+            >
+              取消
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 rounded-full bg-gradient-to-r from-[#1a1612] to-[#2a2420] py-3 text-[13px] font-semibold text-white shadow-[0_8px_24px_rgba(26,22,18,0.3)] transition-all hover:shadow-[0_12px_32px_rgba(26,22,18,0.4)]"
+            >
+              确认解锁
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 const gradeOptions = ["all", "10", "9", "8", "7", "≤6"];
 const languageOptions = ["all", "Japanese", "English", "Simplified Chinese"];
@@ -762,6 +881,10 @@ export default function MarketLuxe() {
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [premiumUnlocked, setPremiumUnlocked] = useState(() => {
+    try { return localStorage.getItem(PREMIUM_LS_KEY) === "1"; } catch { return false; }
+  });
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // 多选平台逻辑：至少保留一个选中
@@ -944,12 +1067,21 @@ export default function MarketLuxe() {
         <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.28em] text-[#a89880]">排序</div>
         <select
           value={filters.sortBy}
-          onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as SortBy })}
+          onChange={(e) => {
+            const val = e.target.value as SortBy;
+            if (val === "premium" && !premiumUnlocked) {
+              setPremiumModalOpen(true);
+              // 重置回之前的值
+              e.target.value = filters.sortBy;
+              return;
+            }
+            setFilters({ ...filters, sortBy: val });
+          }}
           className="h-11 w-full rounded-[0.95rem] border border-[#e0d8cc] bg-[#faf7f2] px-4 text-[13px] text-[#1a1612] outline-none transition-all focus:border-[#c8a84a] focus:bg-white"
         >
           {sortOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {opt.value === "premium" && !premiumUnlocked ? `${opt.label}（测试中）` : opt.label}
             </option>
           ))}
         </select>
@@ -1386,6 +1518,15 @@ export default function MarketLuxe() {
 
         <CardDetailModal card={selectedCard} onClose={() => setSelectedCard(null)} />
         <CollectorDetailModal card={selectedCollectorCard} onClose={() => setSelectedCollectorCard(null)} />
+        <PremiumUnlockModal
+          open={premiumModalOpen}
+          onClose={() => setPremiumModalOpen(false)}
+          onUnlock={() => {
+            setPremiumUnlocked(true);
+            setPremiumModalOpen(false);
+            setFilters({ ...filters, sortBy: "premium" });
+          }}
+        />
       </main>
     </div>
   );
