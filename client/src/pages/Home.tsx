@@ -39,7 +39,7 @@ const MARKET_PLATFORMS = [
     id: "collector",
     label: "Collector Market",
     logo: "/collector-logo.png",
-    live: false,
+    live: true,
   },
 ];
 
@@ -159,11 +159,7 @@ function EntryCard({
           {MARKET_PLATFORMS.map((p) => (
             <div
               key={p.id}
-              className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 ${
-                p.live
-                  ? "border-[#b8e4c8] bg-[#edf9f2]"
-                  : "border-[#e0d8cc] bg-[#f5f0e8] opacity-70"
-              }`}
+              className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 border-[#b8e4c8] bg-[#edf9f2]"
             >
               <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#e0d8cc] bg-white shadow-sm">
                 <img
@@ -172,19 +168,13 @@ function EntryCard({
                   className="h-4 w-4 object-contain"
                 />
               </div>
-              <span className={`text-[11px] font-medium ${
-                p.live ? "text-[#2d7a4f]" : "text-[#8a7f70]"
-              }`}>
+              <span className="text-[11px] font-medium text-[#2d7a4f]">
                 {p.label}
               </span>
-              {p.live ? (
-                <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#4a9e6a] animate-pulse" />
-                  <span className="font-mono text-[9px] text-[#4a9e6a]">Live</span>
-                </span>
-              ) : (
-                <span className="font-mono text-[9px] text-[#a89880]">即将上线</span>
-              )}
+              <span className="flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#4a9e6a] animate-pulse" />
+                <span className="font-mono text-[9px] text-[#4a9e6a]">Live</span>
+              </span>
             </div>
           ))}
         </div>
@@ -241,15 +231,6 @@ export default function Home() {
   const { allCards, loading, totalCount, lastUpdated, refreshData } = useCardData();
 
   const featuredCards = useMemo(() => allCards.slice(0, 6), [allCards]);
-  const topAsk = useMemo(() => {
-    if (!allCards.length) return 0;
-    return Math.max(...allCards.slice(0, 120).map((item) => item.askPriceUSDT));
-  }, [allCards]);
-  const avgFmv = useMemo(() => {
-    if (!allCards.length) return 0;
-    const sample = allCards.slice(0, 120);
-    return sample.reduce((sum, item) => sum + item.fmvPriceUSD, 0) / sample.length;
-  }, [allCards]);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8f5ef_0%,#f1ede4_40%,#f8f6f1_100%)] text-neutral-950">
@@ -308,7 +289,7 @@ export default function Home() {
       </header>
 
       <main className="container pb-14 pt-8 sm:pt-10 lg:px-6">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,0.64fr)_minmax(0,0.36fr)]">
+        <section>
           <motion.section
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -325,58 +306,27 @@ export default function Home() {
               不仅记录它的旅程，更要唤醒它的生命力。
             </p>
             <p className="mt-2 font-serif text-[1.05rem] italic leading-relaxed text-black/38">
-              “别只是拥有它，去见证它。”
+              "别只是拥有它，去见证它。"
             </p>
 
-            {/* 平台标识 — 内嵌在 Hero 区域 */}
+            {/* 平台标识 — 内嵌在 Hero 区域，两个平台都是 Live */}
             <div className="mt-7 flex flex-wrap items-center gap-2">
               <span className="font-mono text-[9px] uppercase tracking-[0.26em] text-black/28 mr-1">监控平台</span>
-              {[{ label: "Renaiss", logo: "/renaiss-logo.png", live: true }, { label: "Collector Market", logo: "/collector-logo.png", live: false }].map((p) => (
+              {[{ label: "Renaiss", logo: "/renaiss-logo.png" }, { label: "Collector Market", logo: "/collector-logo.png" }].map((p) => (
                 <div
                   key={p.label}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 ${
-                    p.live ? "border-emerald-500/25 bg-emerald-50" : "border-black/8 bg-white/60 opacity-60"
-                  }`}
+                  className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 border-emerald-500/25 bg-emerald-50"
                 >
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/8 bg-white shadow-sm">
                     <img src={p.logo} alt={p.label} className="h-4 w-4 object-contain" />
                   </div>
-                  <span className={`text-[11px] font-medium ${
-                    p.live ? "text-emerald-700" : "text-black/40"
-                  }`}>{p.label}</span>
-                  {p.live
-                    ? <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="font-mono text-[9px] text-emerald-600">Live</span></span>
-                    : <span className="font-mono text-[9px] text-black/28">即将</span>}
+                  <span className="text-[11px] font-medium text-emerald-700">{p.label}</span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-mono text-[9px] text-emerald-600">Live</span>
+                  </span>
                 </div>
               ))}
-            </div>
-          </motion.section>
-
-          <motion.section
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.62, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
-            className="grid gap-4 sm:grid-cols-2"
-          >
-            <div className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
-              <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Listed Cards</div>
-              <div className="mt-3 text-3xl font-semibold text-neutral-950">{loading ? "…" : totalCount.toLocaleString()}</div>
-              <div className="mt-1 text-xs text-black/38">实时在售卡牌</div>
-            </div>
-            <div className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
-              <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Updated</div>
-              <div className="mt-3 text-3xl font-semibold text-neutral-950">{formatTime(lastUpdated)}</div>
-              <div className="mt-1 text-xs text-black/38">上次同步时间</div>
-            </div>
-            <div className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
-              <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Top Ask</div>
-              <div className="mt-3 text-3xl font-semibold text-neutral-950">{loading ? "…" : formatCurrency(topAsk)}</div>
-              <div className="mt-1 text-xs text-black/38">样本最高挂牌价</div>
-            </div>
-            <div className="rounded-[1.6rem] border border-black/8 bg-white/82 p-5 shadow-[0_20px_70px_-42px_rgba(24,24,27,0.28)] backdrop-blur-xl">
-              <div className="text-[0.62rem] uppercase tracking-[0.24em] text-black/30">Average FMV</div>
-              <div className="mt-3 text-3xl font-semibold text-neutral-950">{loading ? "…" : formatCurrency(Math.round(avgFmv))}</div>
-              <div className="mt-1 text-xs text-black/38">样本平均 FMV</div>
             </div>
           </motion.section>
         </section>
